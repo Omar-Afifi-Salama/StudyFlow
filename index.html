@@ -13,7 +13,20 @@
             transition: background-color 0.3s, color 0.3s;
             background-color: #1a202c; /* Dark background by default */
             color: #e2e8f0; /* Light text by default */
+            /* Removed overflow: hidden; to allow natural scrolling */
+
+            /* Background animation */
+            background: linear-gradient(45deg, #1a202c, #2d3748, #1a202c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
         }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
 
         /* Scrollbar styling */
         .scrollbar-hide::-webkit-scrollbar {
@@ -149,6 +162,10 @@
             text-decoration: underline;
         }
 
+        /* Navbar & Mode Button Active/Hover effects */
+        .nav-button, .mode-button, button {
+            transition: all 0.2s ease-in-out;
+        }
 
         .nav-button.active {
             background-color: #4a5568; /* Tailwind gray-700 for active tab */
@@ -157,6 +174,122 @@
         .mode-button.active-mode {
             background-color: #2c5282; /* Darker blue for active mode */
             box-shadow: 0 0 0 3px #4299e1; /* Ring-blue-500 */
+        }
+
+        /* Tab content transition for fluidity */
+        .tab-content {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            position: absolute; /* Allows overlaying during transition */
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Disable interaction when hidden */
+            overflow-y: auto; /* Allow internal scrolling if content is too tall */
+            padding-bottom: 20px; /* Ensure space for scrollbar/bottom content */
+        }
+
+        .tab-content.active {
+            opacity: 1;
+            transform: translateY(0);
+            position: static; /* Take up space when active */
+            pointer-events: auto; /* Enable interaction when active */
+        }
+        /* Ensure specific sections are relative to their parent for absolute positioning of content */
+        #main-tracker-section, #notepad-section, #stats-section, #goals-section, #resources-section, #about-section, #coming-soon-section, #sponsor-section { /* Added #sponsor-section */
+            /* Removed max-height here to allow content to dictate height */
+            min-height: 500px; /* Or a suitable minimum */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+        /* Confetti animation */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: transparent; /* Will be set by JS */
+            border-radius: 50%;
+            opacity: 0;
+            animation: fallAndFade 2s forwards ease-out;
+        }
+
+        @keyframes fallAndFade {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y)) rotate(var(--rotate, 720deg));
+            }
+        }
+        /* Desktop specific adjustments for About/Coming Soon */
+        @media (min-width: 1024px) { /* lg breakpoint */
+            #about-section .text-center > p,
+            #about-section .text-center ul,
+            #coming-soon-section > div,
+            #coming-soon-section > p {
+                max-width: 800px; /* Constrain width for readability */
+                margin-left: auto;
+                margin-right: auto;
+                text-align: left; /* Ensure text alignment is left for readability */
+            }
+            #about-section .text-center { /* Re-center the wrapper */
+                text-align: center;
+            }
+        }
+        /* XP Bar Styling */
+        #xp-bar-container {
+            width: 100%;
+            max-width: 300px; /* Decreased width a lot */
+            background-color: #2d3748; /* Darker gray */
+            border-radius: 9999px; /* Full rounded */
+            height: 0.75rem; /* Thinner */
+            /* margin-top: 1rem; Removed as it's now inside the main tracker box */
+            /* margin-bottom: 2rem; Removed as it's now inside the main tracker box */
+            overflow: hidden; /* Hide overflow of inner bar */
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+            position: relative;
+            align-self: center; /* Center horizontally within flex parent */
+            margin-bottom: 1rem; /* Space between bar and timer */
+        }
+
+        #xp-bar-fill {
+            height: 100%;
+            background-color: #63b3ed; /* Blue-400 */
+            width: 0%; /* Initial width */
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Push text to the right if possible */
+            padding-right: 0.5rem;
+            box-sizing: border-box;
+            color: #1a202c; /* Dark text for contrast */
+            font-weight: bold;
+            font-size: 0.6rem; /* text-xs, even smaller for thin bar */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        #xp-info {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e2e8f0; /* Light text over dark bar */
+            font-weight: bold;
+            font-size: 0.75rem; /* text-sm */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+        /* Sponsor section specific styles */
+        .sponsor-logo {
+            filter: grayscale(0.5) contrast(1.2); /* Subtle effect */
+            transition: filter 0.3s ease-in-out;
+        }
+        .sponsor-logo:hover {
+            filter: grayscale(0) contrast(1); /* Remove filter on hover */
         }
     </style>
 </head>
@@ -170,7 +303,6 @@
         <button id="nav-notepad" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
             Notepad
         </button>
-        <!-- Removed the main Statistics tab from the navbar as per request -->
         <button id="nav-goals" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
             Goals
         </button>
@@ -183,20 +315,29 @@
         <button id="nav-coming-soon" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
             Coming Soon
         </button>
+        <button id="nav-sponsor" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Our Sponsor
+        </button>
     </nav>
+
 
     <!-- Main Content Area for Tabs -->
     <div class="flex flex-col items-center justify-center flex-grow p-4 w-full">
 
         <!-- Study Tracker Section (Tab Content) -->
-        <div id="main-tracker-section" class="relative w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl flex flex-col lg:flex-row p-6 space-y-8 lg:space-y-0 lg:space-x-8 max-h-[90vh]">
+        <div id="main-tracker-section" class="relative w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl flex flex-col lg:flex-row p-6 space-y-8 lg:space-y-0 lg:space-x-8 tab-content">
 
             <!-- Main Study Timer Area (Stopwatch/Pomodoro/Stats Switch) -->
             <div class="flex-1 flex flex-col items-center p-4">
-                <h1 class="text-4xl font-bold mb-8 text-gray-100">Study Tracker</h1>
+                <h1 class="text-4xl font-bold mb-4 text-gray-100">Study Tracker</h1>
+                 <!-- XP Bar Container (seamlessly integrated) -->
+                <div id="xp-bar-container">
+                    <div id="xp-bar-fill"></div>
+                    <div id="xp-info"></div>
+                </div>
 
                 <!-- Mode Selector -->
-                <div class="flex justify-center gap-4 mb-8">
+                <div class="flex justify-center gap-4 mb-8 mt-4">
                     <button id="mode-stopwatch-btn" class="mode-button bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
                         Stopwatch
                     </button>
@@ -237,8 +378,33 @@
 
                 <!-- Pomodoro View -->
                 <div id="pomodoro-view" class="w-full flex flex-col items-center hidden">
-                    <!-- Pomodoro Settings -->
-                    <div class="mb-6 w-full max-w-md bg-gray-700 p-4 rounded-lg shadow-inner text-center">
+                    <div class="text-3xl font-semibold mb-2 text-gray-300" id="pomodoro-phase-display">Study Time</div>
+                    <div class="text-xl font-bold mb-4 text-gray-400" id="pomodoro-cycle-counter">Pomodoro #0</div>
+                    <div id="pomodoro-timer-display" class="text-8xl font-extrabold text-green-400 mb-8 select-none">
+                        25:00
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button id="pomodoro-start-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300">
+                            Start (S)
+                        </button>
+                        <button id="pomodoro-pause-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-300 hidden">
+                            Pause (P)
+                        </button>
+                        <button id="pomodoro-reset-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300">
+                            Reset (R)
+                        </button>
+                        <button id="pomodoro-skip-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                            Skip (K)
+                        </button>
+                    </div>
+
+                    <!-- Pomodoro Settings Toggle Button -->
+                    <button id="toggle-pomodoro-settings-btn" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out mt-4 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Customize Pomodoro
+                    </button>
+
+                    <!-- Pomodoro Settings (Initially hidden) -->
+                    <div id="pomodoro-settings" class="mt-6 w-full max-w-md bg-gray-700 p-4 rounded-lg shadow-inner text-center hidden">
                         <h3 class="text-xl font-semibold mb-3 text-gray-100">Pomodoro Settings</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
@@ -257,28 +423,12 @@
                                        class="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 text-center">
                             </div>
                         </div>
+                        <div class="flex items-center justify-center mb-4">
+                            <input type="checkbox" id="ambient-sound-toggle" class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 mr-2">
+                            <label for="ambient-sound-toggle" class="text-gray-300 text-sm">Play Ambient Study Sound</label>
+                        </div>
                         <button id="save-pomodoro-settings-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-md transition duration-300 ease-in-out">
                             Save Settings
-                        </button>
-                    </div>
-
-                    <div class="text-3xl font-semibold mb-2 text-gray-300" id="pomodoro-phase-display">Study Time</div>
-                    <div class="text-xl font-bold mb-4 text-gray-400" id="pomodoro-cycle-counter">Pomodoro #0</div>
-                    <div id="pomodoro-timer-display" class="text-8xl font-extrabold text-green-400 mb-8 select-none">
-                        25:00
-                    </div>
-                    <div class="flex flex-wrap justify-center gap-4 mb-8">
-                        <button id="pomodoro-start-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300">
-                            Start
-                        </button>
-                        <button id="pomodoro-pause-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-300 hidden">
-                            Pause
-                        </button>
-                        <button id="pomodoro-reset-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300">
-                            Reset
-                        </button>
-                        <button id="pomodoro-skip-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
-                            Skip
                         </button>
                     </div>
                 </div>
@@ -333,7 +483,7 @@
         </div>
 
         <!-- Notepad Section (Tab Content) -->
-        <div id="notepad-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+        <div id="notepad-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
             <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">My Notepad</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -371,7 +521,7 @@
         </div>
 
         <!-- Statistics Section (Top-Level Tab Content, now a placeholder as main stats moved) -->
-        <div id="stats-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+        <div id="stats-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
             <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Advanced Study Statistics & Reports</h2>
             <div class="text-center text-gray-300">
                 <p>This tab is reserved for more advanced analytics.</p>
@@ -380,7 +530,7 @@
         </div>
 
         <!-- Goals & Planning Section (Tab Content) -->
-        <div id="goals-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+        <div id="goals-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
             <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Goals & Planning</h2>
             <div class="mb-6">
                 <h3 class="text-xl font-semibold mb-3 text-gray-100">Add New Goal</h3>
@@ -416,7 +566,7 @@
         </div>
 
         <!-- Resources/Links Section (Tab Content) -->
-        <div id="resources-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+        <div id="resources-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
             <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Resources & Links</h2>
             <div class="mb-6">
                 <h3 class="text-xl font-semibold mb-3 text-gray-100">Add New Resource</h3>
@@ -442,7 +592,7 @@
         </div>
 
         <!-- About Section (New Tab Content) -->
-        <div id="about-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+        <div id="about-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
             <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">About StudyFlow</h2>
             <div class="text-center text-gray-300 leading-relaxed text-lg">
                 <p class="mb-4">
@@ -474,7 +624,7 @@
         </div>
 
         <!-- Coming Soon Section (New Tab Content) -->
-        <div id="coming-soon-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+        <div id="coming-soon-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
             <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Coming Soon to StudyFlow!</h2>
             <div class="text-left text-gray-300 leading-relaxed text-lg space-y-6">
                 <p>We're constantly working to improve StudyFlow and bring you even more powerful features to enhance your study experience. Here's a sneak peek at what's in the pipeline:</p>
@@ -527,6 +677,34 @@
                 </div>
 
                 <p class="text-center font-semibold mt-8">Stay tuned for these updates and more to help you master your study routine!</p>
+            </div>
+        </div>
+
+        <!-- Sponsor Section (New Tab Content) -->
+        <div id="sponsor-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Our Sponsor</h2>
+            <div class="text-center text-gray-300 leading-relaxed text-lg flex flex-col items-center">
+                <p class="mb-4 text-xl font-bold text-gray-100">
+                    Proudly Sponsored By:
+                </p>
+                <div class="p-6 bg-gray-700 rounded-lg shadow-xl inline-block max-w-sm sponsor-logo">
+                    <p class="text-green-400 text-5xl font-extrabold mb-2" dir="rtl">
+                        شركة التقوى
+                    </p>
+                    <p class="text-gray-400 text-2xl" dir="rtl">
+                        لِتوصيل المأكولات
+                    </p>
+                    <hr class="border-gray-500 my-4">
+                    <p class="text-green-400 text-3xl font-bold">
+                        Al-Taqwa Company
+                    </p>
+                    <p class="text-gray-400 text-xl">
+                        for Food Delivery
+                    </p>
+                </div>
+                <p class="mt-6 text-xl">
+                    Thank you for supporting our mission!
+                </p>
             </div>
         </div>
 
@@ -652,16 +830,19 @@
         const pomodoroShortBreakMinsInput = document.getElementById('pomodoro-short-break-mins-input'); // New input
         const pomodoroLongBreakMinsInput = document.getElementById('pomodoro-long-break-mins-input'); // New input
         const savePomodoroSettingsBtn = document.getElementById('save-pomodoro-settings-btn'); // New button
+        const togglePomodoroSettingsBtn = document.getElementById('toggle-pomodoro-settings-btn'); // New button for settings toggle
+        const pomodoroSettings = document.getElementById('pomodoro-settings'); // Settings div
+        const ambientSoundToggle = document.getElementById('ambient-sound-toggle'); // New checkbox
 
 
         // Navigation and Tab elements (top-level)
         const navStudyTracker = document.getElementById('nav-study-tracker');
         const navNotepad = document.getElementById('nav-notepad');
-        const navStatsMain = document.getElementById('nav-stats-main'); // This button is removed from HTML
         const navGoals = document.getElementById('nav-goals');
         const navResources = document.getElementById('nav-resources');
         const navAbout = document.getElementById('nav-about'); // New
         const navComingSoon = document.getElementById('nav-coming-soon'); // New
+        const navSponsor = document.getElementById('nav-sponsor'); // New Sponsor tab
 
         const notepadSection = document.getElementById('notepad-section');
         const mainTrackerSection = document.getElementById('main-tracker-section');
@@ -670,6 +851,13 @@
         const resourcesSection = document.getElementById('resources-section');
         const aboutSection = document.getElementById('about-section'); // New
         const comingSoonSection = document.getElementById('coming-soon-section'); // New
+        const sponsorSection = document.getElementById('sponsor-section'); // New Sponsor section
+
+        // XP Bar Elements
+        const xpBarContainer = document.getElementById('xp-bar-container');
+        const xpBarFill = document.getElementById('xp-bar-fill');
+        const xpInfo = document.getElementById('xp-info');
+
 
         // Notepad elements
         const newChecklistItemInput = document.getElementById('new-checklist-item-input');
@@ -745,6 +933,10 @@
 
         // Audio for notifications
         const notificationSound = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); // A simple beep sound
+        const ambientSound = new Audio('https://www.soundjay.com/misc/sounds/water-01.mp3'); // Example ambient sound
+        ambientSound.loop = true;
+        ambientSound.volume = 0.3; // Set a low default volume
+
 
         // Current display mode for the main tracker: 'stopwatch', 'pomodoro', or 'stats'
         let currentDisplayMode = 'stopwatch';
@@ -759,6 +951,35 @@
         let studyGoals = [];
         let studyResources = [];
         let individualNotes = []; // New array for individual notes
+
+        // Level System Variables
+        let currentXP = 0;
+        let currentLevel = 1;
+        let xpToNextLevel = 100; // Initial XP to reach Level 1
+
+        const LEVEL_TITLES = {
+            1: "Rookie",
+            5: "Apprentice",
+            10: "Novice",
+            15: "Practitioner",
+            20: "Journeyman",
+            25: "Scholar",
+            30: "Expert",
+            35: "Adept",
+            40: "Master",
+            45: "Grandmaster",
+            50: "Legend",
+            55: "Oracle",
+            60: "Sage",
+            65: "Virtuoso",
+            70: "Luminary",
+            75: "Ascendant",
+            80: "Enlightened",
+            85: "Omniscient",
+            90: "Transcendent",
+            95: "Divine",
+            100: "Architect of Knowledge"
+        };
 
 
         // Currently edited session ID
@@ -779,8 +1000,8 @@
          * @returns {Promise<boolean>} Resolves to true for OK/Confirm, false for Cancel.
          */
         function showCustomModal(title, message, isConfirm = false) {
-            customModalTitle.textContent = title;
-            customModalMessage.textContent = message;
+            customModalTitle.innerHTML = title; // Use innerHTML for rich content
+            customModalMessage.innerHTML = message; // Use innerHTML for rich content
             customModalCancelBtn.classList.toggle('hidden', !isConfirm);
             customModalOverlay.classList.remove('hidden');
 
@@ -898,6 +1119,45 @@
         }
 
         /**
+         * Triggers a confetti animation.
+         * @param {HTMLElement} targetElement - The element around which confetti will appear.
+         */
+        function triggerConfetti(targetElement) {
+            const colors = ['#f6e05e', '#63b3ed', '#fc8181', '#9f7aea', '#48bb78']; // Yellow, Blue, Red, Purple, Green
+            const numConfetti = 20; // Number of confetti pieces
+
+            const rect = targetElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < numConfetti; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${centerX}px`;
+                confetti.style.top = `${centerY}px`;
+
+                // Randomize trajectory
+                const angle = Math.random() * Math.PI * 2; // Full circle
+                const distance = Math.random() * 100 + 50; // 50-150px
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                const rotation = Math.random() * 720; // Up to 2 full rotations
+
+                confetti.style.setProperty('--x', `${x}px`);
+                confetti.style.setProperty('--y', `${y}px`);
+                confetti.style.setProperty('--rotate', `${rotation}deg`);
+
+                document.body.appendChild(confetti);
+
+                // Remove confetti after animation to clean up DOM
+                confetti.addEventListener('animationend', () => {
+                    confetti.remove();
+                });
+            }
+        }
+
+        /**
          * Saves data to localStorage.
          */
         function saveToLocalStorage() {
@@ -918,6 +1178,12 @@
             localStorage.setItem('pomodoroStudyTime', pomodoroStudyMinsInput.value);
             localStorage.setItem('pomodoroShortBreakTime', pomodoroShortBreakMinsInput.value);
             localStorage.setItem('pomodoroLongBreakTime', pomodoroLongBreakMinsInput.value);
+            localStorage.setItem('ambientSoundEnabled', ambientSoundToggle.checked);
+
+            // Save Level System data
+            localStorage.setItem('currentXP', currentXP);
+            localStorage.setItem('currentLevel', currentLevel);
+            localStorage.setItem('xpToNextLevel', xpToNextLevel);
         }
 
         /**
@@ -941,6 +1207,12 @@
             const storedPomodoroStudyTime = localStorage.getItem('pomodoroStudyTime');
             const storedPomodoroShortBreakTime = localStorage.getItem('pomodoroShortBreakTime');
             const storedPomodoroLongBreakTime = localStorage.getItem('pomodoroLongBreakTime');
+            const storedAmbientSoundEnabled = localStorage.getItem('ambientSoundEnabled');
+
+            // Load Level System data
+            const storedCurrentXP = localStorage.getItem('currentXP');
+            const storedCurrentLevel = localStorage.getItem('currentLevel');
+            const storedXpToNextLevel = localStorage.getItem('xpToNextLevel');
 
 
             if (storedSessions) {
@@ -993,6 +1265,22 @@
                 pomodoroLongBreakMinsInput.value = storedPomodoroLongBreakTime;
                 pomodoroLongBreakTime = parseInt(storedPomodoroLongBreakTime, 10) * 60 * 1000;
             }
+            ambientSoundToggle.checked = (storedAmbientSoundEnabled === 'true'); // Load ambient sound state
+            toggleAmbientSound(ambientSoundToggle.checked);
+
+            // Apply loaded Level System data
+            if (storedCurrentXP) {
+                currentXP = parseInt(storedCurrentXP, 10);
+            }
+            if (storedCurrentLevel) {
+                currentLevel = parseInt(storedCurrentLevel, 10);
+            }
+            // Only update xpToNextLevel from storage if it exists, otherwise calculate
+            if (storedXpToNextLevel) {
+                xpToNextLevel = parseInt(storedXpToNextLevel, 10);
+            } else {
+                xpToNextLevel = calculateXPForNextLevel(currentLevel); // Calculate for the current level if not stored
+            }
 
 
             const todayDate = new Date().toDateString();
@@ -1010,11 +1298,11 @@
             renderGoals();
             renderResources();
             renderIndividualNotes(); // Render individual notes on load
+            updateXPBar(); // Update XP bar on load
         }
 
         /**
          * Recalculates all statistics based on the current studySessions array.
-         * Useful after edits or deletes.
          */
         function recalculateStats() {
             totalStudyOverallMs = 0;
@@ -1114,6 +1402,12 @@
                 studySessions = [];
                 recalculateStats();
                 renderLog();
+                // Reset XP and level on clearing all sessions
+                currentXP = 0;
+                currentLevel = 1;
+                xpToNextLevel = calculateXPForNextLevel(currentLevel);
+                updateXPBar();
+                saveToLocalStorage();
             }
         }
 
@@ -1130,6 +1424,12 @@
             if (confirmed) {
                 const index = studySessions.findIndex(session => session.id === id);
                 if (index !== -1) {
+                    const session = studySessions[index];
+                    // Deduct XP if session is deleted
+                    const xpDeducted = Math.floor(session.durationMs / (1000 * 60)); // 1 XP per minute
+                    currentXP = Math.max(0, currentXP - xpDeducted);
+                    updateLevel(); // Recalculate level after XP change
+
                     studySessions.splice(index, 1);
                     recalculateStats();
                     renderLog();
@@ -1167,6 +1467,7 @@
 
             const sessionIndex = studySessions.findIndex(s => s.id === currentEditingSessionId);
             if (sessionIndex !== -1) {
+                const oldDurationMs = studySessions[sessionIndex].durationMs;
                 const newName = editSessionNameInput.value.trim();
                 const newDurationMinutes = parseInt(editDurationInput.value, 10);
 
@@ -1179,6 +1480,13 @@
 
                 studySessions[sessionIndex].name = newName;
                 studySessions[sessionIndex].durationMs = newDurationMs;
+
+                // Adjust XP based on duration change
+                const oldXP = Math.floor(oldDurationMs / (1000 * 60));
+                const newXP = Math.floor(newDurationMs / (1000 * 60));
+                currentXP += (newXP - oldXP);
+                currentXP = Math.max(0, currentXP); // Ensure XP doesn't go below zero
+                updateLevel(); // Recalculate level after XP change
 
                 recalculateStats();
                 renderLog();
@@ -1227,7 +1535,7 @@
          */
         async function saveGoalTimes() {
             const wakeHour = wakeUpHourInput.value;
-            const wakeAmpm = wakeUpAmpmInput.value;
+            const wakeAmpm = wakeAmpmInput.value;
             const bedHour = bedHourInput.value;
             const bedAmpm = bedAmpmInput.value;
 
@@ -1321,6 +1629,11 @@
             };
             studySessions.push(newSession);
 
+            // Grant XP for the session duration (1 XP per minute)
+            const xpGained = Math.floor(sessionDurationMs / (1000 * 60));
+            currentXP += xpGained;
+            updateLevel(); // Check for level up
+
             totalStudyOverallMs += sessionDurationMs;
             totalStudyTodayMs += sessionDurationMs;
 
@@ -1376,6 +1689,11 @@
         function startPomodoroTimer() {
             if (pomodoroIsRunning) return;
 
+            // Attempt to play ambient sound only if enabled and not already playing
+            if (ambientSoundToggle.checked && ambientSound.paused) {
+                ambientSound.play().catch(e => console.error("Error playing ambient sound:", e));
+            }
+
             pomodoroIsRunning = true;
             pomodoroSessionStartTime = Date.now() - (pomodoroCurrentTime); // Record start time for logging
 
@@ -1386,8 +1704,10 @@
                     notificationSound.play(); // Play sound notification
                     if (pomodoroPhase === 'study') {
                         logPomodoroSession(pomodoroStudyTime); // Log the full study duration
+                        triggerConfetti(pomodoroTimerDisplay); // Confetti on study session end
                     }
                     pomodoroIsRunning = false; // Stop the timer
+                    ambientSound.pause(); // Pause ambient sound when timer ends naturally
 
                     // Move to next phase state, but DO NOT start it automatically
                     advancePomodoroPhaseState();
@@ -1408,6 +1728,7 @@
 
             pomodoroIsRunning = false;
             clearInterval(pomodoroTimerId);
+            ambientSound.pause(); // Pause ambient sound when timer is paused
             updatePomodoroDisplay();
         }
 
@@ -1419,6 +1740,7 @@
             pomodoroCurrentTime = pomodoroStudyTime;
             pomodoroPhase = 'study';
             pomodoroCycleCount = 0;
+            ambientSound.pause(); // Ensure ambient sound is off on reset
             updatePomodoroDisplay();
         }
 
@@ -1427,6 +1749,7 @@
          */
         function skipPomodoroPhase() {
             pausePomodoroTimer(); // Ensure timer is paused
+            ambientSound.pause(); // Ensure ambient sound is off on skip
             // If currently studying and time has elapsed, log the completed portion
             if (pomodoroPhase === 'study' && pomodoroCurrentTime < pomodoroStudyTime) {
                  logPomodoroSession(pomodoroStudyTime - pomodoroCurrentTime);
@@ -1474,6 +1797,11 @@
             };
             studySessions.push(newSession);
 
+            // Grant XP for the session duration (1 XP per minute)
+            const xpGained = Math.floor(durationMs / (1000 * 60));
+            currentXP += xpGained;
+            updateLevel(); // Check for level up
+
             totalStudyOverallMs += durationMs;
             totalStudyTodayMs += durationMs;
 
@@ -1505,6 +1833,26 @@
             resetPomodoroTimer();
             saveToLocalStorage();
             showCustomModal('Settings Saved!', 'Pomodoro settings updated successfully.');
+        }
+
+        /**
+         * Toggles the play/pause state of the ambient background sound.
+         * @param {boolean} enable - True to play, false to pause.
+         */
+        function toggleAmbientSound(enable) {
+            if (enable) {
+                // Check if audio is supported and user interaction occurred
+                const playPromise = ambientSound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.error("Ambient sound autoplay prevented:", error);
+                        // Show a message to the user that autoplay failed and they might need to interact
+                        // This might be due to browser autoplay policies, so we don't block the app.
+                    });
+                }
+            } else {
+                ambientSound.pause();
+            }
         }
 
 
@@ -1769,6 +2117,10 @@
             const goalIndex = studyGoals.findIndex(goal => goal.id === id);
             if (goalIndex !== -1) {
                 studyGoals[goalIndex].completed = !studyGoals[goalIndex].completed;
+                if (studyGoals[goalIndex].completed) {
+                    // Trigger confetti when a goal is marked complete
+                    triggerConfetti(goalsContainer); // Or a more specific element if desired
+                }
                 saveToLocalStorage();
                 renderGoals();
             }
@@ -1862,6 +2214,68 @@
         }
 
 
+        // --- Level System Functions ---
+
+        /**
+         * Calculates the XP needed for a given level.
+         * The formula makes it progressively harder to level up.
+         * @param {number} level - The level for which to calculate XP.
+         * @returns {number} The amount of XP required to reach this level from the previous one.
+         */
+        function calculateXPForNextLevel(level) {
+            // A balanced quadratic progression: baseXP + (level * level * growthFactor)
+            const baseXP = 100;
+            const growthFactor = 5; // Smaller growth factor for smoother progression
+            return Math.floor(baseXP + ((level - 1) * (level - 1) * growthFactor));
+        }
+
+        /**
+         * Gets the title for the current level.
+         * @param {number} level - The current level.
+         * @returns {string} The title for the level, or "Advanced Learner" as a fallback.
+         */
+        function getLevelTitle(level) {
+            // Find the highest level key that is less than or equal to the current level
+            const sortedLevels = Object.keys(LEVEL_TITLES).map(Number).sort((a, b) => b - a);
+            for (const key of sortedLevels) {
+                if (level >= key) {
+                    return LEVEL_TITLES[key];
+                }
+            }
+            return "New Learner"; // Default title for levels below 1
+        }
+
+        /**
+         * Updates the user's level based on current XP.
+         */
+        function updateLevel() {
+            let leveledUp = false;
+            while (currentXP >= xpToNextLevel) {
+                currentXP -= xpToNextLevel; // Carry over excess XP
+                currentLevel++;
+                xpToNextLevel = calculateXPForNextLevel(currentLevel);
+                leveledUp = true;
+                const levelTitle = getLevelTitle(currentLevel);
+                showCustomModal('Level Up!', `Congratulations! You've reached Level ${currentLevel}: <strong>${levelTitle}</strong>!`, false);
+            }
+            updateXPBar(); // Always update the bar after XP/level changes
+            saveToLocalStorage(); // Persist changes
+        }
+
+        /**
+         * Updates the visual XP bar and text.
+         */
+        function updateXPBar() {
+            const progress = (currentXP / xpToNextLevel) * 100;
+            xpBarFill.style.width = `${Math.min(100, progress)}%`; // Cap at 100%
+            const currentTitle = getLevelTitle(currentLevel);
+            xpInfo.textContent = `Level ${currentLevel} (${currentTitle}) | XP: ${currentXP} / ${xpToNextLevel}`;
+
+            // Show/hide XP bar container based on current tab
+            const isStudyTrackerActive = navStudyTracker.classList.contains('active');
+            xpBarContainer.classList.toggle('hidden', !isStudyTrackerActive);
+        }
+
         // --- Main Mode Switching Functions (Stopwatch/Pomodoro/Stats) ---
 
         /**
@@ -1907,32 +2321,39 @@
          * @param {string} tabId - ID of the tab section (e.g., 'main-tracker-section', 'notepad-section').
          */
         function showTab(tabId) {
-            // Hide all main content sections
-            mainTrackerSection.classList.add('hidden');
-            notepadSection.classList.add('hidden');
-            statsSection.classList.add('hidden'); // This is the advanced stats tab
-            goalsSection.classList.add('hidden');
-            resourcesSection.classList.add('hidden');
-            aboutSection.classList.add('hidden'); // New about section
-            comingSoonSection.classList.add('hidden'); // New coming soon section
+            // Hide all main content sections and remove active class
+            document.querySelectorAll('.tab-content').forEach(section => {
+                section.classList.remove('active');
+                section.classList.add('hidden');
+            });
+
 
             // Show the selected section
-            document.getElementById(tabId).classList.remove('hidden');
+            const targetSection = document.getElementById(tabId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                setTimeout(() => { // Small delay to allow 'hidden' to apply before 'active' for transition
+                    targetSection.classList.add('active');
+                }, 10);
+            }
+
 
             // Update active state for main navigation buttons
             document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
             // This handles mapping section IDs to nav button IDs correctly
-            document.getElementById(`nav-${tabId.replace('-section', '').replace('main-tracker', 'study-tracker').replace('stats', 'stats-main').replace('coming-soon', 'coming-soon')}`).classList.add('active');
+            document.getElementById(`nav-${tabId.replace('-section', '').replace('main-tracker', 'study-tracker').replace('stats', 'stats-main').replace('coming-soon', 'coming-soon').replace('sponsor', 'sponsor')}`).classList.add('active');
 
 
             // Special handling for the main tracker to manage stopwatch/pomodoro/stats sub-views
             if (tabId === 'main-tracker-section') {
                 // When coming back to main-tracker-section, show the last active mode
                 showMainModeView(currentDisplayMode);
+                xpBarContainer.classList.remove('hidden'); // Show XP bar on study tracker tab
             } else {
                 // Ensure timers are stopped if not on the main tracker page
                 if (isRunning) stopTimer();
                 if (pomodoroIsRunning) pausePomodoroTimer();
+                xpBarContainer.classList.add('hidden'); // Hide XP bar on other tabs
             }
         }
 
@@ -1953,6 +2374,13 @@
         pomodoroResetBtn.addEventListener('click', resetPomodoroTimer);
         pomodoroSkipBtn.addEventListener('click', skipPomodoroPhase);
         savePomodoroSettingsBtn.addEventListener('click', savePomodoroSettings); // New listener for settings
+        togglePomodoroSettingsBtn.addEventListener('click', () => {
+            pomodoroSettings.classList.toggle('hidden');
+        });
+        ambientSoundToggle.addEventListener('change', (event) => {
+            toggleAmbientSound(event.target.checked);
+            saveToLocalStorage(); // Save ambient sound state
+        });
 
 
         // Mode Switchers within Study Tracker Tab
@@ -1977,11 +2405,11 @@
         // Top-level Tab navigation listeners
         navStudyTracker.addEventListener('click', () => showTab('main-tracker-section'));
         navNotepad.addEventListener('click', () => showTab('notepad-section'));
-        // navStatsMain.addEventListener('click', () => showTab('stats-section')); // Removed as button is removed
         navGoals.addEventListener('click', () => showTab('goals-section'));
         navResources.addEventListener('click', () => showTab('resources-section'));
         navAbout.addEventListener('click', () => showTab('about-section')); // New about tab
         navComingSoon.addEventListener('click', () => showTab('coming-soon-section')); // New coming soon tab
+        navSponsor.addEventListener('click', () => showTab('sponsor-section')); // New sponsor tab
 
 
         // Checklist event listeners
@@ -2108,6 +2536,7 @@
             showTab('main-tracker-section');
             showMainModeView('stopwatch'); // Explicitly show stopwatch as default sub-tab
             navStudyTracker.classList.add('active'); // Ensure main nav button is active
+            updateXPBar(); // Initialize XP bar visibility and state
 
             // Check if goal has been set, otherwise prompt
             const hasSetGoal = localStorage.getItem('hasSetGoal');
