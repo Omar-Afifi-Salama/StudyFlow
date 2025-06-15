@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS for basic layout and scrollbar */
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: #1a202c; /* Dark background by default */
+            color: #e2e8f0; /* Light text by default */
+        }
+
+        /* Scrollbar styling */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #2d3748; /* Dark modal background */
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            width: 500px;
+            color: #e2e8f0; /* Light text in modal */
+            position: relative; /* For close button positioning */
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #e2e8f0;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* Checklist specific styling */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            background-color: #374151; /* gray-700 */
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            gap: 0.75rem;
+        }
+
+        .checklist-item.completed span {
+            text-decoration: line-through;
+            color: #9ca3af; /* gray-400 */
+        }
+        .checklist-item input[type="checkbox"] {
+            min-width: 1.25rem; /* Ensure checkbox doesn't shrink */
+            min-height: 1.25rem; /* Ensure checkbox doesn't shrink */
+            cursor: pointer;
+        }
+
+        /* Goal item styling */
+        .goal-item {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping for smaller screens */
+            background-color: #374151; /* gray-700 */
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            gap: 0.75rem;
+        }
+        .goal-item.completed span.goal-text,
+        .goal-item.completed span.goal-description {
+            text-decoration: line-through;
+            color: #9ca3af; /* gray-400 */
+        }
+        .goal-item input[type="checkbox"] {
+            min-width: 1.25rem;
+            min-height: 1.25rem;
+            cursor: pointer;
+        }
+        .goal-item .due-date {
+            font-size: 0.75rem; /* text-xs */
+            color: #a0aec0; /* gray-400 */
+            margin-left: auto; /* Push to right */
+        }
+        .goal-item .priority-tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            color: #1a202c; /* dark text for tags */
+        }
+        .priority-tag.low { background-color: #f6e05e; /* yellow */ }
+        .priority-tag.medium { background-color: #63b3ed; /* blue */ }
+        .priority-tag.high { background-color: #fc8181; /* red */ }
+        .goal-description {
+            font-size: 0.875rem; /* text-sm */
+            color: #cbd5e0; /* gray-300 */
+            width: 100%; /* Take full width on next line */
+            margin-top: 0.25rem;
+            padding-left: calc(1.25rem + 0.75rem); /* Align with checkbox text */
+        }
+
+
+        /* Resource item styling */
+        .resource-item {
+            display: flex;
+            align-items: center;
+            background-color: #374151; /* gray-700 */
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            gap: 0.75rem;
+        }
+        .resource-item a {
+            color: #63b3ed; /* blue-400 */
+            text-decoration: none;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .resource-item a:hover {
+            text-decoration: underline;
+        }
+
+
+        .nav-button.active {
+            background-color: #4a5568; /* Tailwind gray-700 for active tab */
+        }
+
+        .mode-button.active-mode {
+            background-color: #2c5282; /* Darker blue for active mode */
+            box-shadow: 0 0 0 3px #4299e1; /* Ring-blue-500 */
+        }
+    </style>
+</head>
+<body class="dark flex flex-col items-center min-h-screen">
+
+    <!-- Navigation Bar -->
+    <nav class="w-full bg-gray-900 p-4 shadow-lg flex justify-center space-x-4 flex-wrap">
+        <button id="nav-study-tracker" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Study Tracker
+        </button>
+        <button id="nav-notepad" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Notepad
+        </button>
+        <!-- Removed the main Statistics tab from the navbar as per request -->
+        <button id="nav-goals" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Goals
+        </button>
+        <button id="nav-resources" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Resources
+        </button>
+        <button id="nav-about" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            About
+        </button>
+        <button id="nav-coming-soon" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Coming Soon
+        </button>
+    </nav>
+
+    <!-- Main Content Area for Tabs -->
+    <div class="flex flex-col items-center justify-center flex-grow p-4 w-full">
+
+        <!-- Study Tracker Section (Tab Content) -->
+        <div id="main-tracker-section" class="relative w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl flex flex-col lg:flex-row p-6 space-y-8 lg:space-y-0 lg:space-x-8 max-h-[90vh]">
+
+            <!-- Main Study Timer Area (Stopwatch/Pomodoro/Stats Switch) -->
+            <div class="flex-1 flex flex-col items-center p-4">
+                <h1 class="text-4xl font-bold mb-8 text-gray-100">Study Tracker</h1>
+
+                <!-- Mode Selector -->
+                <div class="flex justify-center gap-4 mb-8">
+                    <button id="mode-stopwatch-btn" class="mode-button bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
+                        Stopwatch
+                    </button>
+                    <button id="mode-pomodoro-btn" class="mode-button bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
+                        Pomodoro
+                    </button>
+                    <button id="mode-stats-sub" class="mode-button bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
+                        Stats
+                    </button>
+                </div>
+
+                <!-- Stopwatch View -->
+                <div id="stopwatch-view" class="w-full flex flex-col items-center">
+                    <!-- Stopwatch Display -->
+                    <div id="stopwatch-display" class="text-8xl font-extrabold text-blue-400 mb-8 select-none">
+                        00 min 00 s
+                    </div>
+
+                    <!-- Session Naming Input -->
+                    <div class="w-full flex justify-center mb-4">
+                        <input type="text" id="session-name-input" placeholder="Enter session name (optional)"
+                               class="p-3 rounded-full border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md">
+                    </div>
+
+                    <!-- Stopwatch Controls -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button id="start-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                            Start (S)
+                        </button>
+                        <button id="stop-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 hidden">
+                            Stop (P)
+                        </button>
+                        <button id="add-to-log-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-300" disabled>
+                            Add to Log (L)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pomodoro View -->
+                <div id="pomodoro-view" class="w-full flex flex-col items-center hidden">
+                    <!-- Pomodoro Settings -->
+                    <div class="mb-6 w-full max-w-md bg-gray-700 p-4 rounded-lg shadow-inner text-center">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-100">Pomodoro Settings</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label for="pomodoro-study-mins-input" class="block text-sm font-medium text-gray-300">Study (min)</label>
+                                <input type="number" id="pomodoro-study-mins-input" value="25" min="1" max="120"
+                                       class="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 text-center">
+                            </div>
+                            <div>
+                                <label for="pomodoro-short-break-mins-input" class="block text-sm font-medium text-gray-300">Short Break (min)</label>
+                                <input type="number" id="pomodoro-short-break-mins-input" value="5" min="1" max="30"
+                                       class="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-center">
+                            </div>
+                            <div>
+                                <label for="pomodoro-long-break-mins-input" class="block text-sm font-medium text-gray-300">Long Break (min)</label>
+                                <input type="number" id="pomodoro-long-break-mins-input" value="15" min="1" max="60"
+                                       class="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 text-center">
+                            </div>
+                        </div>
+                        <button id="save-pomodoro-settings-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-md transition duration-300 ease-in-out">
+                            Save Settings
+                        </button>
+                    </div>
+
+                    <div class="text-3xl font-semibold mb-2 text-gray-300" id="pomodoro-phase-display">Study Time</div>
+                    <div class="text-xl font-bold mb-4 text-gray-400" id="pomodoro-cycle-counter">Pomodoro #0</div>
+                    <div id="pomodoro-timer-display" class="text-8xl font-extrabold text-green-400 mb-8 select-none">
+                        25:00
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button id="pomodoro-start-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300">
+                            Start
+                        </button>
+                        <button id="pomodoro-pause-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-300 hidden">
+                            Pause
+                        </button>
+                        <button id="pomodoro-reset-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300">
+                            Reset
+                        </button>
+                        <button id="pomodoro-skip-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                            Skip
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats View (New Sub-Tab Content) -->
+                <div id="stats-view" class="w-full flex flex-col items-center hidden">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-100">Your Study Statistics</h2>
+                    <!-- Stats Display -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 w-full">
+                        <div class="bg-blue-700 p-4 rounded-xl shadow text-center">
+                            <p class="text-sm font-semibold text-blue-100">Today's Study</p>
+                            <p id="stat-today" class="text-2xl font-bold text-white mt-1">0 min</p>
+                        </div>
+                        <div class="bg-green-700 p-4 rounded-xl shadow text-center">
+                            <p class="text-sm font-semibold text-green-100">Total Study</p>
+                            <p id="stat-overall" class="text-2xl font-bold text-white mt-1">0 min</p>
+                        </div>
+                        <div class="bg-purple-700 p-4 rounded-xl shadow text-center">
+                            <p class="text-sm font-semibold text-purple-100">Daily Goal Completion</p>
+                            <p id="stat-daily-goal" class="text-2xl font-bold text-white mt-1">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Set Daily Goal Button (remains in main tracker section) -->
+                <div class="absolute bottom-4 left-4">
+                    <button id="set-daily-goal-btn" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Set Daily Goal
+                    </button>
+                </div>
+            </div>
+
+            <!-- Study Log Section -->
+            <div class="lg:w-1/3 p-4 bg-gray-700 rounded-xl shadow-inner flex flex-col">
+                <h2 class="text-2xl font-bold mb-4 text-gray-100 text-center">Study Log</h2>
+                <div class="flex justify-center gap-2 mb-4">
+                    <button id="prev-log-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-1 px-3 rounded-full transition duration-300 ease-in-out">
+                        &larr; Prev
+                    </button>
+                    <button id="next-log-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-1 px-3 rounded-full transition duration-300 ease-in-out">
+                        Next &rarr;
+                    </button>
+                </div>
+                <div id="study-log-entries" class="flex-grow overflow-y-auto scrollbar-hide space-y-6 p-2 max-h-96">
+                    <!-- Log entries will be inserted here by JavaScript -->
+                    <p class="text-gray-300 text-center">No sessions logged yet.</p>
+                </div>
+                <button id="clear-log-btn" class="mt-4 bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out">
+                    Clear All Sessions
+                </button>
+            </div>
+        </div>
+
+        <!-- Notepad Section (Tab Content) -->
+        <div id="notepad-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">My Notepad</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100">Checklist</h3>
+                    <div class="flex mb-4 gap-2">
+                        <input type="text" id="new-checklist-item-input" placeholder="Add new checklist item"
+                               class="flex-grow p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="add-checklist-item-btn"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out">
+                            Add Item
+                        </button>
+                    </div>
+                    <div id="checklist-items-container" class="space-y-2 max-h-72 overflow-y-auto scrollbar-hide">
+                        <!-- Checklist items will be rendered here -->
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100">My Notes</h3>
+                    <div class="flex flex-col gap-3 mb-4">
+                        <input type="text" id="new-note-title-input" placeholder="Note Title"
+                               class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <textarea id="new-note-content-input" placeholder="Note Content"
+                                  class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"></textarea>
+                        <button id="add-note-btn"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out">
+                            Add Note
+                        </button>
+                    </div>
+                    <div id="notes-list-container" class="space-y-2 max-h-72 overflow-y-auto scrollbar-hide">
+                        <!-- Individual notes will be rendered here -->
+                        <p class="text-gray-400 text-center text-sm">No notes added yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section (Top-Level Tab Content, now a placeholder as main stats moved) -->
+        <div id="stats-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Advanced Study Statistics & Reports</h2>
+            <div class="text-center text-gray-300">
+                <p>This tab is reserved for more advanced analytics.</p>
+                <p class="mt-2">Coming soon: Detailed graphs, custom reports, and long-term trends!</p>
+            </div>
+        </div>
+
+        <!-- Goals & Planning Section (Tab Content) -->
+        <div id="goals-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Goals & Planning</h2>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3 text-gray-100">Add New Goal</h3>
+                <div class="flex flex-col gap-4 mb-4">
+                    <input type="text" id="new-goal-name-input" placeholder="Goal Name (e.g., Finish Chapter 3)"
+                           class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                    <textarea id="new-goal-description-input" placeholder="Description (optional, e.g., Read pages 50-75 and do exercises)"
+                              class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full min-h-[60px]"></textarea>
+                    <div class="flex flex-col md:flex-row gap-4 w-full">
+                        <select id="new-goal-priority-input"
+                                class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow">
+                            <option value="Low">Low Priority</option>
+                            <option value="Medium" selected>Medium Priority</option>
+                            <option value="High">High Priority</option>
+                        </select>
+                        <input type="date" id="new-goal-due-date-input"
+                               class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow">
+                        <button id="add-goal-btn"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out">
+                            Add Goal
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-3 text-gray-100">My Study Goals</h3>
+                <div id="goals-container" class="space-y-3 max-h-96 overflow-y-auto scrollbar-hide p-2">
+                    <!-- Goals will be rendered here -->
+                    <p class="text-gray-400 text-center text-sm">No goals added yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources/Links Section (Tab Content) -->
+        <div id="resources-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Resources & Links</h2>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-3 text-gray-100">Add New Resource</h3>
+                <div class="flex flex-col md:flex-row gap-4 mb-4">
+                    <input type="text" id="new-resource-title-input" placeholder="Resource Title"
+                           class="flex-grow p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="url" id="new-resource-url-input" placeholder="Resource URL (e.g., https://example.com)"
+                           class="flex-grow p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="add-resource-btn"
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out">
+                        Add Resource
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-3 text-gray-100">My Resources</h3>
+                <div id="resources-container" class="space-y-3 max-h-96 overflow-y-auto scrollbar-hide p-2">
+                    <!-- Resources will be rendered here -->
+                    <p class="text-gray-400 text-center text-sm">No resources added yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Section (New Tab Content) -->
+        <div id="about-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">About StudyFlow</h2>
+            <div class="text-center text-gray-300 leading-relaxed text-lg">
+                <p class="mb-4">
+                    Welcome to <strong>StudyFlow</strong>, your free and intuitive online companion designed to help students and anyone seeking to boost their productivity and manage their study time effectively. Our mission is to provide a seamless and distraction-free environment to support your learning journey.
+                </p>
+                <p class="mb-4">
+                    <strong>Why StudyFlow?</strong>
+                    <ul class="list-disc list-inside text-left mx-auto max-w-md mt-2 space-y-1">
+                        <li><strong>Stay Organized:</strong> Keep track of your study sessions, set clear goals, and manage important resources all in one place.</li>
+                        <li><strong>Boost Focus:</strong> Utilize the Pomodoro Technique to break down your study into manageable intervals, improving concentration and reducing burnout.</li>
+                        <li><strong>Track Progress:</strong> Monitor your daily and overall study time to understand your habits and celebrate your achievements.</li>
+                        <li><strong>No More Procrastination:</strong> By setting clear objectives and actively tracking your time, you can overcome the urge to procrastinate and make consistent progress.</li>
+                    </ul>
+                </p>
+                <p class="font-semibold text-white mt-4">
+                    <span class="text-red-400">Your Privacy is Paramount:</span>
+                    At StudyFlow, we believe in complete transparency and respect your privacy. Everything you enter into this application – your study sessions, notes, goals, and resources – is stored <strong>exclusively within your browser's local storage</strong>. This means:
+                </p>
+                <ul class="list-disc list-inside text-left mx-auto max-w-md mt-2 space-y-1 text-gray-300">
+                    <li>We do <strong>NOT</strong> collect any personal data.</li>
+                    <li>We do <strong>NOT</strong> store any of your information on our servers.</li>
+                    <li>We do <strong>NOT</strong> engage in data scraping.</li>
+                    <li>Your data never leaves your device unless you choose to manually export it.</li>
+                </ul>
+                <p class="mt-4">
+                    Enjoy a secure and efficient study experience!
+                </p>
+            </div>
+        </div>
+
+        <!-- Coming Soon Section (New Tab Content) -->
+        <div id="coming-soon-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Coming Soon to StudyFlow!</h2>
+            <div class="text-left text-gray-300 leading-relaxed text-lg space-y-6">
+                <p>We're constantly working to improve StudyFlow and bring you even more powerful features to enhance your study experience. Here's a sneak peek at what's in the pipeline:</p>
+
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-blue-400">📈 <strong>Enhanced Statistics & Visualization</strong></h3>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li><strong>Interactive Charts:</strong> Visualize your study habits over days, weeks, and months with dynamic graphs to identify trends and peak productivity times.</li>
+                        <li><strong>Productivity Reports:</strong> Get detailed summaries of your study sessions, goal completion rates, and average focus durations.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-green-400">🔔 <strong>Smart Notifications & Reminders</strong></h3>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li><strong>Daily Goal Reminders:</strong> Receive timely notifications if you're falling behind on your daily study targets.</li>
+                        <li><strong>Break Reminders:</strong> Gentle nudges to take a well-deserved break during long, uninterrupted study sessions.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-purple-400">🎨 <strong>Theming and Personalization</strong></h3>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li><strong>Light Mode Toggle:</strong> Switch between the current dark theme and a new, eye-friendly light mode.</li>
+                        <li><strong>Custom Color Palettes:</strong> Personalize the look and feel of StudyFlow by choosing from a variety of color schemes.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-yellow-400">💾 <strong>Advanced Data Management</strong></h3>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li><strong>Export/Import Data:</strong> Easily back up your study sessions, notes, goals, and resources by exporting them as a JSON file, and import them back whenever needed.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-pink-400">🏆 <strong>Gamification Elements</strong></h3>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li><strong>Achievements & Badges:</strong> Earn virtual rewards for reaching study milestones and maintaining consistency.</li>
+                        <li><strong>Study Streaks:</strong> Track your consecutive study days to build motivation and healthy habits.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-orange-400">📝 <strong>Enhanced Note-Taking Experience</strong></h3>
+                    <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li><strong>Markdown Support:</strong> Add basic formatting (bold, italics, lists) to your notes for better organization and readability.</li>
+                        <li><strong>Search Notes:</strong> Quickly find specific notes using a dedicated search bar.</li>
+                    </ul>
+                </div>
+
+                <p class="text-center font-semibold mt-8">Stay tuned for these updates and more to help you master your study routine!</p>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Custom Confirmation/Alert Modal -->
+    <div id="custom-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="custom-modal-close-btn">&times;</button>
+            <h3 id="custom-modal-title" class="text-xl font-bold mb-4"></h3>
+            <p id="custom-modal-message" class="mb-6"></p>
+            <div class="flex justify-end space-x-3">
+                <button id="custom-modal-cancel-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out hidden">
+                    Cancel
+                </button>
+                <button id="custom-modal-confirm-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Edit Session Modal -->
+    <div id="edit-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="edit-modal-close-btn">&times;</button>
+            <h2 class="text-xl font-bold mb-4 text-gray-100">Edit Study Session</h2>
+            <div class="mb-4">
+                <label for="edit-session-name" class="block text-sm font-medium mb-1 text-gray-300">Session Name</label>
+                <input type="text" id="edit-session-name"
+                       class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="edit-duration" class="block text-sm font-medium mb-1 text-gray-300">Duration (minutes)</label>
+                <input type="number" id="edit-duration"
+                       class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="cancel-edit-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">
+                    Cancel
+                </button>
+                <button id="save-edit-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Setting Modal -->
+    <div id="goal-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="goal-modal-close-btn">&times;</button>
+            <h2 class="text-xl font-bold mb-4 text-gray-100">Set Daily Study Goal</h2>
+            <p class="text-sm text-gray-300 mb-4">
+                Based on your wake-up and bedtime, we'll calculate 60% of your awake time as a daily study target.
+            </p>
+            <div class="mb-4 flex items-center gap-2">
+                <label for="wake-up-hour-input" class="block text-sm font-medium text-gray-300">Wake-up Time:</label>
+                <select id="wake-up-hour-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20"></select>
+                <select id="wake-up-ampm-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+            <div class="mb-4 flex items-center gap-2">
+                <label for="bed-hour-input" class="block text-sm font-medium text-gray-300">Bedtime:</label>
+                <select id="bed-hour-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20"></select>
+                <select id="bed-ampm-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="cancel-goal-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">
+                    Cancel
+                </button>
+                <button id="save-goal-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">
+                    Save Goal
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // DOM Elements
+        const stopwatchDisplay = document.getElementById('stopwatch-display');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const addLogBtn = document.getElementById('add-to-log-btn');
+        const studyLogEntries = document.getElementById('study-log-entries');
+        // Stats displays are now within stats-view, but elements still used directly
+        const statToday = document.getElementById('stat-today');
+        const statOverall = document.getElementById('stat-overall');
+        const statDailyGoal = document.getElementById('stat-daily-goal');
+
+        const clearLogBtn = document.getElementById('clear-log-btn');
+        const sessionNameInput = document.getElementById('session-name-input');
+        const setDailyGoalBtn = document.getElementById('set-daily-goal-btn');
+        const prevLogBtn = document.getElementById('prev-log-btn');
+        const nextLogBtn = document.getElementById('next-log-btn');
+
+        // Mode Switch Buttons (Stopwatch/Pomodoro/Stats)
+        const modeStopwatchBtn = document.getElementById('mode-stopwatch-btn');
+        const modePomodoroBtn = document.getElementById('mode-pomodoro-btn');
+        const modeStatsSubBtn = document.getElementById('mode-stats-sub'); // New sub-tab button for stats
+
+        const stopwatchView = document.getElementById('stopwatch-view');
+        const pomodoroView = document.getElementById('pomodoro-view');
+        const statsView = document.getElementById('stats-view'); // New stats view div
+
+        // Pomodoro Elements
+        const pomodoroTimerDisplay = document.getElementById('pomodoro-timer-display');
+        const pomodoroPhaseDisplay = document.getElementById('pomodoro-phase-display');
+        const pomodoroCycleCounter = document.getElementById('pomodoro-cycle-counter'); // New cycle counter element
+        const pomodoroStartBtn = document.getElementById('pomodoro-start-btn');
+        const pomodoroPauseBtn = document.getElementById('pomodoro-pause-btn');
+        const pomodoroResetBtn = document.getElementById('pomodoro-reset-btn');
+        const pomodoroSkipBtn = document.getElementById('pomodoro-skip-btn');
+        const pomodoroStudyMinsInput = document.getElementById('pomodoro-study-mins-input'); // New input
+        const pomodoroShortBreakMinsInput = document.getElementById('pomodoro-short-break-mins-input'); // New input
+        const pomodoroLongBreakMinsInput = document.getElementById('pomodoro-long-break-mins-input'); // New input
+        const savePomodoroSettingsBtn = document.getElementById('save-pomodoro-settings-btn'); // New button
+
+
+        // Navigation and Tab elements (top-level)
+        const navStudyTracker = document.getElementById('nav-study-tracker');
+        const navNotepad = document.getElementById('nav-notepad');
+        const navStatsMain = document.getElementById('nav-stats-main'); // This button is removed from HTML
+        const navGoals = document.getElementById('nav-goals');
+        const navResources = document.getElementById('nav-resources');
+        const navAbout = document.getElementById('nav-about'); // New
+        const navComingSoon = document.getElementById('nav-coming-soon'); // New
+
+        const notepadSection = document.getElementById('notepad-section');
+        const mainTrackerSection = document.getElementById('main-tracker-section');
+        const statsSection = document.getElementById('stats-section'); // This is now for advanced stats, not basic ones.
+        const goalsSection = document.getElementById('goals-section');
+        const resourcesSection = document.getElementById('resources-section');
+        const aboutSection = document.getElementById('about-section'); // New
+        const comingSoonSection = document.getElementById('coming-soon-section'); // New
+
+        // Notepad elements
+        const newChecklistItemInput = document.getElementById('new-checklist-item-input');
+        const addChecklistItemBtn = document.getElementById('add-checklist-item-btn');
+        const checklistItemsContainer = document.getElementById('checklist-items-container');
+        // Removed notesTextarea, now individual notes
+        const newNoteTitleInput = document.getElementById('new-note-title-input'); // New
+        const newNoteContentInput = document.getElementById('new-note-content-input'); // New
+        const addNoteBtn = document.getElementById('add-note-btn'); // New
+        const notesListContainer = document.getElementById('notes-list-container'); // New
+
+
+        // Goals elements
+        const newGoalNameInput = document.getElementById('new-goal-name-input');
+        const newGoalDescriptionInput = document.getElementById('new-goal-description-input'); // New
+        const newGoalPriorityInput = document.getElementById('new-goal-priority-input'); // New
+        const newGoalDueDateInput = document.getElementById('new-goal-due-date-input');
+        const addGoalBtn = document.getElementById('add-goal-btn');
+        const goalsContainer = document.getElementById('goals-container');
+
+        // Resources elements
+        const newResourceTitleInput = document.getElementById('new-resource-title-input');
+        const newResourceUrlInput = document.getElementById('new-resource-url-input');
+        const addResourceBtn = document.getElementById('add-resource-btn');
+        const resourcesContainer = document.getElementById('resources-container');
+
+
+        // Edit Session Modal Elements
+        const editModalOverlay = document.getElementById('edit-modal-overlay');
+        const editModalCloseBtn = document.getElementById('edit-modal-close-btn');
+        const editSessionNameInput = document.getElementById('edit-session-name');
+        const editDurationInput = document.getElementById('edit-duration');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+
+        // Goal Setting Modal Elements
+        const goalModalOverlay = document.getElementById('goal-modal-overlay');
+        const goalModalCloseBtn = document.getElementById('goal-modal-close-btn');
+        const wakeUpHourInput = document.getElementById('wake-up-hour-input');
+        const wakeUpAmpmInput = document.getElementById('wake-up-ampm-input');
+        const bedHourInput = document.getElementById('bed-hour-input');
+        const bedAmpmInput = document.getElementById('bed-ampm-input');
+        const cancelGoalBtn = document.getElementById('cancel-goal-btn');
+        const saveGoalBtn = document.getElementById('save-goal-btn');
+
+        // Custom Modal Elements
+        const customModalOverlay = document.getElementById('custom-modal-overlay');
+        const customModalCloseBtn = document.getElementById('custom-modal-close-btn');
+        const customModalTitle = document.getElementById('custom-modal-title');
+        const customModalMessage = document.getElementById('custom-modal-message');
+        const customModalCancelBtn = document.getElementById('custom-modal-cancel-btn');
+        const customModalConfirmBtn = document.getElementById('custom-modal-confirm-btn');
+
+        // Stopwatch Variables
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let isRunning = false;
+        let currentSessionStartTime = null; // Track start time of current continuous session for logging
+
+        // Pomodoro Variables
+        let pomodoroStudyTime = 25 * 60 * 1000; // 25 minutes in ms, now customizable
+        let pomodoroShortBreakTime = 5 * 60 * 1000; // 5 minutes in ms, now customizable
+        let pomodoroLongBreakTime = 15 * 60 * 1000; // 15 minutes in ms, now customizable
+        const POMODORO_CYCLES_FOR_LONG_BREAK = 4;
+
+        let pomodoroCurrentTime = pomodoroStudyTime;
+        let pomodoroTimerId = null;
+        let pomodoroIsRunning = false;
+        let pomodoroPhase = 'study'; // 'study', 'shortBreak', 'longBreak'
+        let pomodoroCycleCount = 0; // Number of study sessions completed
+        let pomodoroSessionStartTime = 0; // The actual start time of the current *study* session being tracked by Pomodoro.
+
+        // Audio for notifications
+        const notificationSound = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); // A simple beep sound
+
+        // Current display mode for the main tracker: 'stopwatch', 'pomodoro', or 'stats'
+        let currentDisplayMode = 'stopwatch';
+
+
+        // Data Storage
+        let studySessions = [];
+        let totalStudyTodayMs = 0;
+        let totalStudyOverallMs = 0;
+        let dailyStudyGoalMs = 0;
+        let checklistItems = [];
+        let studyGoals = [];
+        let studyResources = [];
+        let individualNotes = []; // New array for individual notes
+
+
+        // Currently edited session ID
+        let currentEditingSessionId = null;
+
+        // Log navigation variables
+        let currentLogScrollPosition = 0;
+        const logEntryHeight = 110;
+
+        // --- Custom Modal Functions ---
+        let resolveCustomModalPromise;
+
+        /**
+         * Displays a custom alert/confirmation modal.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message to display.
+         * @param {boolean} isConfirm - If true, displays a cancel button for confirmation.
+         * @returns {Promise<boolean>} Resolves to true for OK/Confirm, false for Cancel.
+         */
+        function showCustomModal(title, message, isConfirm = false) {
+            customModalTitle.textContent = title;
+            customModalMessage.textContent = message;
+            customModalCancelBtn.classList.toggle('hidden', !isConfirm);
+            customModalOverlay.classList.remove('hidden');
+
+            return new Promise((resolve) => {
+                resolveCustomModalPromise = resolve;
+
+                customModalConfirmBtn.onclick = () => {
+                    customModalOverlay.classList.add('hidden');
+                    resolve(true);
+                };
+
+                customModalCancelBtn.onclick = () => {
+                    customModalOverlay.classList.add('hidden');
+                    resolve(false);
+                };
+
+                customModalCloseBtn.onclick = () => {
+                    customModalOverlay.classList.add('hidden');
+                    resolve(false); // Treat closing as cancellation for confirm modals
+                };
+            });
+        }
+
+
+        // --- Utility Functions ---
+
+        /**
+         * Generates a unique ID.
+         * @returns {string} A unique ID.
+         */
+        function generateUniqueId() {
+            return crypto.randomUUID();
+        }
+
+        /**
+         * Formats milliseconds into a human-readable string (e.g., "88 min 7 s").
+         * @param {number} ms - The time in milliseconds.
+         * @returns {string} Formatted time string.
+         */
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes} min ${seconds} s`;
+        }
+
+        /**
+         * Formats milliseconds into a MM:SS string.
+         * @param {number} ms - The time in milliseconds.
+         * @returns {string} Formatted time string (MM:SS).
+         */
+        function formatMinutesSeconds(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        /**
+         * Formats a Date object into a readable time string (e.g., "HH:MM AM/PM").
+         * @param {Date} date - The Date object.
+         * @returns {string} Formatted time string.
+         */
+        function formatDateTime(date) {
+            const options = { hour: 'numeric', minute: 'numeric', hour12: true };
+            return date.toLocaleString('en-US', options);
+        }
+
+        /**
+         * Converts hours and AM/PM to minutes from midnight (24-hour format).
+         * @param {string} hour - Hour (1-12).
+         * @param {string} ampm - "AM" or "PM".
+         * @returns {number} Minutes from midnight.
+         */
+        function hourAmpmToMinutes(hour, ampm) {
+            let h = parseInt(hour, 10);
+            if (ampm === 'PM' && h !== 12) {
+                h += 12;
+            } else if (ampm === 'AM' && h === 12) {
+                h = 0; // 12 AM is 00 hours
+            }
+            return h * 60; // We only deal with hours, no minutes for input.
+        }
+
+        /**
+         * Calculates the daily study target based on wake-up and bedtime.
+         * @param {string} wakeHour - Wake-up hour (1-12).
+         * @param {string} wakeAmpm - Wake-up AM/PM.
+         * @param {string} bedHour - Bedtime hour (1-12).
+         * @param {string} bedAmpm - Bedtime AM/PM.
+         * @returns {number} Daily study goal in milliseconds.
+         */
+        function calculateDailyTargetMs(wakeHour, wakeAmpm, bedHour, bedAmpm) {
+            if (!wakeHour || !wakeAmpm || !bedHour || !bedAmpm) return 0;
+
+            const wakeMinutes = hourAmpmToMinutes(wakeHour, wakeAmpm);
+            const bedMinutes = hourAmpmToMinutes(bedHour, bedAmpm);
+
+            let awakeDurationMinutes;
+            if (bedMinutes > wakeMinutes) {
+                awakeDurationMinutes = bedMinutes - wakeMinutes;
+            } else {
+                // Spans across midnight (e.g., wake 10 PM, bed 6 AM)
+                awakeDurationMinutes = (24 * 60 - wakeMinutes) + bedMinutes;
+            }
+
+            console.log(`Wake Time: ${wakeHour} ${wakeAmpm} (${wakeMinutes} min from midnight)`);
+            console.log(`Bed Time: ${bedHour} ${bedAmpm} (${bedMinutes} min from midnight)`);
+            console.log(`Calculated Awake Duration: ${awakeDurationMinutes} minutes`);
+
+            const targetMinutes = Math.round(awakeDurationMinutes * 0.60);
+            console.log(`60% of awake time: ${targetMinutes} minutes`);
+
+            return targetMinutes * 60 * 1000; // Convert to milliseconds
+        }
+
+        /**
+         * Saves data to localStorage.
+         */
+        function saveToLocalStorage() {
+            localStorage.setItem('studySessions', JSON.stringify(studySessions));
+            localStorage.setItem('totalStudyTodayMs', totalStudyTodayMs);
+            localStorage.setItem('totalStudyOverallMs', totalStudyOverallMs);
+            localStorage.setItem('dailyStudyGoalMs', dailyStudyGoalMs);
+            localStorage.setItem('wakeUpHour', wakeUpHourInput.value);
+            localStorage.setItem('wakeUpAmpm', wakeUpAmpmInput.value);
+            localStorage.setItem('bedHour', bedHourInput.value);
+            localStorage.setItem('bedAmpm', bedAmpmInput.value);
+            localStorage.setItem('checklistItems', JSON.stringify(checklistItems));
+            localStorage.setItem('individualNotes', JSON.stringify(individualNotes)); // Save individual notes
+            localStorage.setItem('studyGoals', JSON.stringify(studyGoals));
+            localStorage.setItem('studyResources', JSON.stringify(studyResources));
+
+            // Save Pomodoro settings
+            localStorage.setItem('pomodoroStudyTime', pomodoroStudyMinsInput.value);
+            localStorage.setItem('pomodoroShortBreakTime', pomodoroShortBreakMinsInput.value);
+            localStorage.setItem('pomodoroLongBreakTime', pomodoroLongBreakMinsInput.value);
+        }
+
+        /**
+         * Loads data from localStorage.
+         */
+        function loadFromLocalStorage() {
+            const storedSessions = localStorage.getItem('studySessions');
+            const storedTotalToday = localStorage.getItem('totalStudyTodayMs');
+            const storedTotalOverall = localStorage.getItem('totalStudyOverallMs');
+            const storedDailyGoal = localStorage.getItem('dailyStudyGoalMs');
+            const storedWakeHour = localStorage.getItem('wakeUpHour');
+            const storedWakeAmpm = localStorage.getItem('wakeUpAmpm');
+            const storedBedHour = localStorage.getItem('bedHour');
+            const storedBedAmpm = localStorage.getItem('bedAmpm');
+            const storedChecklistItems = localStorage.getItem('checklistItems');
+            const storedIndividualNotes = localStorage.getItem('individualNotes'); // Load individual notes
+            const storedGoals = localStorage.getItem('studyGoals');
+            const storedResources = localStorage.getItem('studyResources');
+
+            // Load Pomodoro settings
+            const storedPomodoroStudyTime = localStorage.getItem('pomodoroStudyTime');
+            const storedPomodoroShortBreakTime = localStorage.getItem('pomodoroShortBreakTime');
+            const storedPomodoroLongBreakTime = localStorage.getItem('pomodoroLongBreakTime');
+
+
+            if (storedSessions) {
+                studySessions = JSON.parse(storedSessions);
+            }
+            if (storedTotalToday) {
+                totalStudyTodayMs = parseInt(storedTotalToday, 10);
+            }
+            if (storedTotalOverall) {
+                totalStudyOverallMs = parseInt(storedTotalOverall, 10);
+            }
+            if (storedDailyGoal) {
+                dailyStudyGoalMs = parseInt(storedDailyGoal, 10);
+            }
+            if (storedWakeHour) {
+                wakeUpHourInput.value = storedWakeHour;
+            }
+            if (storedWakeAmpm) {
+                wakeUpAmpmInput.value = storedWakeAmpm;
+            }
+            if (storedBedHour) {
+                bedHourInput.value = storedBedHour;
+            }
+            if (storedBedAmpm) {
+                bedAmpmInput.value = storedBedAmpm;
+            }
+            if (storedChecklistItems) {
+                checklistItems = JSON.parse(storedChecklistItems);
+            }
+            if (storedIndividualNotes) { // Load individual notes
+                individualNotes = JSON.parse(storedIndividualNotes);
+            }
+            if (storedGoals) {
+                studyGoals = JSON.parse(storedGoals);
+            }
+            if (storedResources) {
+                studyResources = JSON.parse(storedResources);
+            }
+
+            // Apply loaded Pomodoro settings
+            if (storedPomodoroStudyTime) {
+                pomodoroStudyMinsInput.value = storedPomodoroStudyTime;
+                pomodoroStudyTime = parseInt(storedPomodoroStudyTime, 10) * 60 * 1000;
+            }
+            if (storedPomodoroShortBreakTime) {
+                pomodoroShortBreakMinsInput.value = storedPomodoroShortBreakTime;
+                pomodoroShortBreakTime = parseInt(storedPomodoroShortBreakTime, 10) * 60 * 1000;
+            }
+            if (storedPomodoroLongBreakTime) {
+                pomodoroLongBreakMinsInput.value = storedPomodoroLongBreakTime;
+                pomodoroLongBreakTime = parseInt(storedPomodoroLongBreakTime, 10) * 60 * 1000;
+            }
+
+
+            const todayDate = new Date().toDateString();
+            const sessionsToday = studySessions.filter(session => new Date(session.endTime).toDateString() === todayDate);
+
+            if (sessionsToday.length === 0) {
+                totalStudyTodayMs = 0;
+            } else {
+                totalStudyTodayMs = sessionsToday.reduce((sum, session) => sum + session.durationMs, 0);
+            }
+
+            renderStats();
+            renderLog();
+            renderChecklist();
+            renderGoals();
+            renderResources();
+            renderIndividualNotes(); // Render individual notes on load
+        }
+
+        /**
+         * Recalculates all statistics based on the current studySessions array.
+         * Useful after edits or deletes.
+         */
+        function recalculateStats() {
+            totalStudyOverallMs = 0;
+            totalStudyTodayMs = 0;
+
+            const todayDate = new Date().toDateString();
+
+            studySessions.forEach(session => {
+                totalStudyOverallMs += session.durationMs;
+                if (new Date(session.endTime).toDateString() === todayDate) {
+                    totalStudyTodayMs += session.durationMs;
+                }
+            });
+
+            renderStats();
+            saveToLocalStorage();
+        }
+
+        /**
+         * Updates the stopwatch display with the current elapsed time.
+         */
+        function updateStopwatchDisplay() {
+            const currentTime = Date.now();
+            const currentElapsed = currentTime - startTime + elapsedTime;
+            stopwatchDisplay.textContent = formatTime(currentElapsed);
+        }
+
+        /**
+         * Renders all study sessions in the log section.
+         */
+        function renderLog() {
+            studyLogEntries.innerHTML = ''; // Clear existing entries
+            if (studySessions.length === 0) {
+                studyLogEntries.innerHTML = '<p class="text-gray-300 text-center">No sessions logged yet.</p>';
+                return;
+            }
+
+            const sortedSessions = [...studySessions].sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
+
+            sortedSessions.forEach((session) => {
+                const sessionDiv = document.createElement('div');
+                sessionDiv.className = 'bg-gray-800 p-4 rounded-xl shadow-md';
+                sessionDiv.innerHTML = `
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <span class="font-semibold text-gray-100 truncate">${session.name || 'Untitled'}</span>
+                        <span class="text-gray-200 text-sm font-bold">${formatTime(session.durationMs)}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-400 mt-1">
+                        <span>${formatDateTime(new Date(session.startTime))} - ${formatDateTime(new Date(session.endTime))}</span>
+                        <div class="flex space-x-2">
+                            <button class="edit-session-btn bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-1 px-2 rounded-full text-xs" data-id="${session.id}">
+                                Edit
+                            </button>
+                            <button class="delete-session-btn bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-2 rounded-full text-xs" data-id="${session.id}">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+                studyLogEntries.appendChild(sessionDiv);
+            });
+
+            // Attach event listeners for edit/delete buttons
+            document.querySelectorAll('.edit-session-btn').forEach(button => {
+                button.addEventListener('click', (event) => openEditModal(event.target.dataset.id));
+            });
+            document.querySelectorAll('.delete-session-btn').forEach(button => {
+                button.addEventListener('click', (event) => deleteSession(event.target.dataset.id));
+            });
+        }
+
+        /**
+         * Updates the statistics display.
+         */
+        function renderStats() {
+            statToday.textContent = formatTime(totalStudyTodayMs);
+            statOverall.textContent = formatTime(totalStudyOverallMs);
+
+            if (dailyStudyGoalMs > 0) {
+                const completionPercentage = Math.min(100, Math.round((totalStudyTodayMs / dailyStudyGoalMs) * 100));
+                statDailyGoal.textContent = `${completionPercentage}%`;
+            } else {
+                statDailyGoal.textContent = `N/A`;
+            }
+        }
+
+        /**
+         * Clears all study sessions and statistics.
+         */
+        async function clearAllSessions() {
+            const confirmed = await showCustomModal(
+                'Clear All Sessions',
+                'Are you sure you want to clear all study sessions? This cannot be undone.',
+                true // isConfirm = true
+            );
+            if (confirmed) {
+                studySessions = [];
+                recalculateStats();
+                renderLog();
+            }
+        }
+
+        /**
+         * Deletes a session by its ID.
+         * @param {string} id - The ID of the session to delete.
+         */
+        async function deleteSession(id) {
+            const confirmed = await showCustomModal(
+                'Delete Session',
+                'Are you sure you want to delete this session?',
+                true // isConfirm = true
+            );
+            if (confirmed) {
+                const index = studySessions.findIndex(session => session.id === id);
+                if (index !== -1) {
+                    studySessions.splice(index, 1);
+                    recalculateStats();
+                    renderLog();
+                }
+            }
+        }
+
+        /**
+         * Opens the edit session modal.
+         * @param {string} id - The ID of the session to edit.
+         */
+        function openEditModal(id) {
+            currentEditingSessionId = id;
+            const session = studySessions.find(s => s.id === id);
+            if (session) {
+                editSessionNameInput.value = session.name || '';
+                editDurationInput.value = Math.floor(session.durationMs / (1000 * 60));
+                editModalOverlay.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Closes the edit session modal.
+         */
+        function closeEditModal() {
+            editModalOverlay.classList.add('hidden');
+            currentEditingSessionId = null;
+        }
+
+        /**
+         * Saves changes from the edit session modal.
+         */
+        async function saveEditedSession() {
+            if (!currentEditingSessionId) return;
+
+            const sessionIndex = studySessions.findIndex(s => s.id === currentEditingSessionId);
+            if (sessionIndex !== -1) {
+                const newName = editSessionNameInput.value.trim();
+                const newDurationMinutes = parseInt(editDurationInput.value, 10);
+
+                if (isNaN(newDurationMinutes) || newDurationMinutes < 0) {
+                    await showCustomModal('Invalid Input', "Please enter a valid duration in minutes (a non-negative number).");
+                    return;
+                }
+
+                const newDurationMs = newDurationMinutes * 60 * 1000;
+
+                studySessions[sessionIndex].name = newName;
+                studySessions[sessionIndex].durationMs = newDurationMs;
+
+                recalculateStats();
+                renderLog();
+                closeEditModal();
+            }
+        }
+
+        /**
+         * Populates hour dropdowns for goal setting.
+         */
+        function populateHourDropdowns() {
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString().padStart(2, '0');
+                option.textContent = i.toString();
+                wakeUpHourInput.appendChild(option);
+
+                const bedOption = document.createElement('option');
+                bedOption.value = i.toString().padStart(2, '0');
+                bedOption.textContent = i.toString();
+                bedHourInput.appendChild(bedOption);
+            }
+        }
+
+        /**
+         * Opens the goal setting modal.
+         */
+        function openGoalModal() {
+            // Set defaults or loaded values
+            wakeUpHourInput.value = localStorage.getItem('wakeUpHour') || '08';
+            wakeUpAmpmInput.value = localStorage.getItem('wakeUpAmpm') || 'AM';
+            bedHourInput.value = localStorage.getItem('bedHour') || '11';
+            bedAmpmInput.value = localStorage.getItem('bedAmpm') || 'PM';
+            goalModalOverlay.classList.remove('hidden');
+        }
+
+        /**
+         * Closes the goal setting modal.
+         */
+        function closeGoalModal() {
+            goalModalOverlay.classList.add('hidden');
+        }
+
+        /**
+         * Saves wake-up and bedtime, then recalculates the daily goal.
+         */
+        async function saveGoalTimes() {
+            const wakeHour = wakeUpHourInput.value;
+            const wakeAmpm = wakeUpAmpmInput.value;
+            const bedHour = bedHourInput.value;
+            const bedAmpm = bedAmpmInput.value;
+
+            if (!wakeHour || !wakeAmpm || !bedHour || !bedAmpm) {
+                await showCustomModal('Missing Information', "Please select both wake-up time (hour and AM/PM) and bedtime (hour and AM/PM).");
+                return;
+            }
+
+            dailyStudyGoalMs = calculateDailyTargetMs(wakeHour, wakeAmpm, bedHour, bedAmpm);
+            localStorage.setItem('hasSetGoal', 'true');
+            saveToLocalStorage();
+            renderStats();
+            closeGoalModal();
+        }
+
+        // --- Stopwatch Functions ---
+
+        /**
+         * Sets the state of control buttons (visible/hidden and disabled) and input fields for Stopwatch mode.
+         */
+        function setStopwatchButtonStates() {
+            if (isRunning) {
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                addLogBtn.disabled = false;
+                sessionNameInput.disabled = true;
+            } else {
+                startBtn.classList.remove('hidden');
+                stopBtn.classList.add('hidden');
+                addLogBtn.disabled = (elapsedTime === 0);
+                sessionNameInput.disabled = false;
+            }
+        }
+
+        /**
+         * Starts the stopwatch.
+         */
+        function startTimer() {
+            if (isRunning) return;
+
+            isRunning = true;
+            startTime = Date.now();
+            if (elapsedTime === 0) {
+                currentSessionStartTime = startTime;
+            }
+
+            timerInterval = setInterval(() => {
+                const current = Date.now();
+                const totalCurrentElapsed = current - startTime + elapsedTime;
+                stopwatchDisplay.textContent = formatTime(totalCurrentElapsed);
+            }, 1000);
+
+            setStopwatchButtonStates();
+        }
+
+        /**
+         * Stops the stopwatch.
+         */
+        function stopTimer() {
+            if (!isRunning) return;
+
+            isRunning = false;
+            clearInterval(timerInterval);
+            elapsedTime += Date.now() - startTime;
+
+            setStopwatchButtonStates();
+        }
+
+        /**
+         * Adds the current stopwatch session to the study log.
+         * Resets the stopwatch after logging.
+         */
+        function addSessionToLog() {
+            if (isRunning) {
+                stopTimer();
+            }
+
+            if (elapsedTime === 0) return;
+
+            const sessionStartTime = currentSessionStartTime || (Date.now() - elapsedTime);
+            const sessionEndTime = Date.now();
+            const sessionDurationMs = elapsedTime;
+            const sessionName = sessionNameInput.value.trim() || 'Untitled Session';
+
+            const newSession = {
+                id: generateUniqueId(),
+                name: sessionName,
+                startTime: sessionStartTime,
+                endTime: sessionEndTime,
+                durationMs: sessionDurationMs,
+            };
+            studySessions.push(newSession);
+
+            totalStudyOverallMs += sessionDurationMs;
+            totalStudyTodayMs += sessionDurationMs;
+
+            saveToLocalStorage();
+            recalculateStats();
+            renderLog();
+
+            elapsedTime = 0;
+            currentSessionStartTime = null;
+            stopwatchDisplay.textContent = '00 min 00 s';
+            sessionNameInput.value = '';
+            setStopwatchButtonStates();
+        }
+
+        // --- Pomodoro Timer Functions ---
+
+        /**
+         * Updates the Pomodoro display with current time and phase.
+         */
+        function updatePomodoroDisplay() {
+            pomodoroTimerDisplay.textContent = formatMinutesSeconds(pomodoroCurrentTime);
+            let phaseText = '';
+            let timerColor = '';
+
+            if (pomodoroPhase === 'study') {
+                phaseText = 'Study Time';
+                timerColor = '#48bb78'; /* Green */
+            } else if (pomodoroPhase === 'shortBreak') {
+                phaseText = 'Short Break';
+                timerColor = '#f6e05e'; /* Yellow */
+            } else if (pomodoroPhase === 'longBreak') {
+                phaseText = 'Long Break';
+                timerColor = '#fc8181'; /* Red */
+            }
+            pomodoroPhaseDisplay.textContent = phaseText;
+            pomodoroTimerDisplay.style.color = timerColor;
+
+            pomodoroCycleCounter.textContent = `Pomodoro #${pomodoroCycleCount}`;
+
+            // Update button states
+            if (pomodoroIsRunning) {
+                pomodoroStartBtn.classList.add('hidden');
+                pomodoroPauseBtn.classList.remove('hidden');
+            } else {
+                pomodoroStartBtn.classList.remove('hidden');
+                pomodoroPauseBtn.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Starts the Pomodoro timer.
+         */
+        function startPomodoroTimer() {
+            if (pomodoroIsRunning) return;
+
+            pomodoroIsRunning = true;
+            pomodoroSessionStartTime = Date.now() - (pomodoroCurrentTime); // Record start time for logging
+
+            pomodoroTimerId = setInterval(() => {
+                pomodoroCurrentTime -= 1000;
+                if (pomodoroCurrentTime <= 0) {
+                    clearInterval(pomodoroTimerId);
+                    notificationSound.play(); // Play sound notification
+                    if (pomodoroPhase === 'study') {
+                        logPomodoroSession(pomodoroStudyTime); // Log the full study duration
+                    }
+                    pomodoroIsRunning = false; // Stop the timer
+
+                    // Move to next phase state, but DO NOT start it automatically
+                    advancePomodoroPhaseState();
+                    updatePomodoroDisplay(); // Update display to show next phase/time, but stopped
+                    showCustomModal('Phase Ended!', `Your ${pomodoroPhase === 'study' ? 'study' : 'break'} session has ended. Click Start to begin the next phase.`, false);
+
+                }
+                updatePomodoroDisplay();
+            }, 1000);
+            updatePomodoroDisplay(); // Initial update when started
+        }
+
+        /**
+         * Pauses the Pomodoro timer.
+         */
+        function pausePomodoroTimer() {
+            if (!pomodoroIsRunning) return;
+
+            pomodoroIsRunning = false;
+            clearInterval(pomodoroTimerId);
+            updatePomodoroDisplay();
+        }
+
+        /**
+         * Resets the Pomodoro timer to initial study phase.
+         */
+        function resetPomodoroTimer() {
+            pausePomodoroTimer();
+            pomodoroCurrentTime = pomodoroStudyTime;
+            pomodoroPhase = 'study';
+            pomodoroCycleCount = 0;
+            updatePomodoroDisplay();
+        }
+
+        /**
+         * Skips the current Pomodoro phase and moves to the next, stopping the timer.
+         */
+        function skipPomodoroPhase() {
+            pausePomodoroTimer(); // Ensure timer is paused
+            // If currently studying and time has elapsed, log the completed portion
+            if (pomodoroPhase === 'study' && pomodoroCurrentTime < pomodoroStudyTime) {
+                 logPomodoroSession(pomodoroStudyTime - pomodoroCurrentTime);
+            }
+            advancePomodoroPhaseState(); // Set up the next phase
+            updatePomodoroDisplay(); // Update display to show next phase/time, but stopped
+        }
+
+        /**
+         * Advances the Pomodoro timer to the next phase (study, short break, or long break).
+         * Does NOT start the timer.
+         */
+        function advancePomodoroPhaseState() {
+            if (pomodoroPhase === 'study') {
+                pomodoroCycleCount++;
+                if (pomodoroCycleCount % POMODORO_CYCLES_FOR_LONG_BREAK === 0) {
+                    pomodoroPhase = 'longBreak';
+                    pomodoroCurrentTime = pomodoroLongBreakTime;
+                } else {
+                    pomodoroPhase = 'shortBreak';
+                    pomodoroCurrentTime = pomodoroShortBreakTime;
+                }
+            } else { // It was a break, go back to study
+                pomodoroPhase = 'study';
+                pomodoroCurrentTime = pomodoroStudyTime;
+            }
+            // Do not call startPomodoroTimer() here. User must manually start.
+        }
+
+        /**
+         * Logs a completed Pomodoro study session.
+         * @param {number} durationMs - The duration of the study session in milliseconds.
+         */
+        function logPomodoroSession(durationMs) {
+            const sessionName = `Pomodoro Study #${pomodoroCycleCount}`;
+            const sessionEndTime = Date.now();
+            const sessionStartTime = sessionEndTime - durationMs; // Calculate start time from end and duration
+
+            const newSession = {
+                id: generateUniqueId(),
+                name: sessionName,
+                startTime: sessionStartTime,
+                endTime: sessionEndTime,
+                durationMs: durationMs,
+            };
+            studySessions.push(newSession);
+
+            totalStudyOverallMs += durationMs;
+            totalStudyTodayMs += durationMs;
+
+            saveToLocalStorage();
+            recalculateStats();
+            renderLog();
+        }
+
+        /**
+         * Saves customized Pomodoro settings and updates the timer.
+         */
+        async function savePomodoroSettings() {
+            const studyMins = parseInt(pomodoroStudyMinsInput.value, 10);
+            const shortBreakMins = parseInt(pomodoroShortBreakMinsInput.value, 10);
+            const longBreakMins = parseInt(pomodoroLongBreakMinsInput.value, 10);
+
+            if (isNaN(studyMins) || studyMins <= 0 ||
+                isNaN(shortBreakMins) || shortBreakMins <= 0 ||
+                isNaN(longBreakMins) || longBreakMins <= 0) {
+                await showCustomModal('Invalid Input', 'Please enter positive numbers for all Pomodoro durations.');
+                return;
+            }
+
+            pomodoroStudyTime = studyMins * 60 * 1000;
+            pomodoroShortBreakTime = shortBreakMins * 60 * 1000;
+            pomodoroLongBreakTime = longBreakMins * 60 * 1000;
+
+            // Reset Pomodoro timer with new settings
+            resetPomodoroTimer();
+            saveToLocalStorage();
+            showCustomModal('Settings Saved!', 'Pomodoro settings updated successfully.');
+        }
+
+
+        // --- Log Navigation Functions ---
+
+        /**
+         * Scrolls the log entries view to the previous item.
+         */
+        function scrollLogPrev() {
+            currentLogScrollPosition -= logEntryHeight;
+            if (currentLogScrollPosition < 0) {
+                currentLogScrollPosition = 0;
+            }
+            studyLogEntries.scrollTo({
+                top: currentLogScrollPosition,
+                behavior: 'smooth'
+            });
+        }
+
+        /**
+         * Scrolls the log entries view to the next item.
+         */
+        function scrollLogNext() {
+            currentLogScrollPosition += logEntryHeight;
+            const maxScroll = studyLogEntries.scrollHeight - studyLogEntries.clientHeight;
+            if (currentLogScrollPosition > maxScroll) {
+                currentLogScrollPosition = maxScroll;
+            }
+            studyLogEntries.scrollTo({
+                top: currentLogScrollPosition,
+                behavior: 'smooth'
+            });
+        }
+
+        // --- Checklist Functions ---
+        function renderChecklist() {
+            checklistItemsContainer.innerHTML = '';
+            if (checklistItems.length === 0) {
+                checklistItemsContainer.innerHTML = '<p class="text-gray-400 text-center text-sm">No items yet. Add one above!</p>';
+                return;
+            }
+
+            checklistItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `checklist-item ${item.completed ? 'completed' : ''}`;
+                itemDiv.innerHTML = `
+                    <input type="checkbox" data-id="${item.id}" ${item.completed ? 'checked' : ''}
+                           class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                    <span class="flex-grow text-gray-100">${item.text}</span>
+                    <button class="delete-checklist-item-btn bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-2 rounded-full text-xs">
+                        Delete
+                    </button>
+                `;
+                checklistItemsContainer.appendChild(itemDiv);
+            });
+
+            // Attach event listeners for new checklist items
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => toggleChecklistItem(event.target.dataset.id));
+            });
+            document.querySelectorAll('.delete-checklist-item-btn').forEach(button => {
+                button.addEventListener('click', (event) => deleteChecklistItem(event.target.closest('.checklist-item').querySelector('input[type="checkbox"]').dataset.id));
+            });
+        }
+
+        function addChecklistItem() {
+            const itemText = newChecklistItemInput.value.trim();
+            if (itemText) {
+                checklistItems.push({ id: generateUniqueId(), text: itemText, completed: false });
+                newChecklistItemInput.value = '';
+                saveToLocalStorage();
+                renderChecklist();
+            }
+        }
+
+        function toggleChecklistItem(id) {
+            const itemIndex = checklistItems.findIndex(item => item.id === id);
+            if (itemIndex !== -1) {
+                checklistItems[itemIndex].completed = !checklistItems[itemIndex].completed;
+                saveToLocalStorage();
+                renderChecklist();
+            }
+        }
+
+        async function deleteChecklistItem(id) {
+            const confirmed = await showCustomModal(
+                'Delete Checklist Item',
+                'Are you sure you want to delete this checklist item?',
+                true
+            );
+            if (confirmed) {
+                const itemIndex = checklistItems.findIndex(item => item.id === id);
+                if (itemIndex !== -1) {
+                    checklistItems.splice(itemIndex, 1);
+                    saveToLocalStorage();
+                    renderChecklist();
+                }
+            }
+        }
+
+        // --- Individual Notes Functions ---
+        function renderIndividualNotes() {
+            notesListContainer.innerHTML = '';
+            if (individualNotes.length === 0) {
+                notesListContainer.innerHTML = '<p class="text-gray-400 text-center text-sm">No notes added yet.</p>';
+                return;
+            }
+
+            individualNotes.forEach(note => {
+                const noteDiv = document.createElement('div');
+                noteDiv.className = `bg-gray-700 p-3 rounded-md shadow-md mb-2`;
+                noteDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-semibold text-gray-100 text-lg">${note.title || 'Untitled Note'}</span>
+                        <div class="flex space-x-2">
+                            <button class="edit-note-btn bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-1 px-2 rounded-full text-xs" data-id="${note.id}">Edit</button>
+                            <button class="delete-note-btn bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-2 rounded-full text-xs" data-id="${note.id}">Delete</button>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm whitespace-pre-wrap">${note.content}</p>
+                `;
+                notesListContainer.appendChild(noteDiv);
+            });
+
+            document.querySelectorAll('.delete-note-btn').forEach(button => {
+                button.addEventListener('click', (event) => deleteIndividualNote(event.target.dataset.id));
+            });
+            document.querySelectorAll('.edit-note-btn').forEach(button => {
+                button.addEventListener('click', (event) => editIndividualNote(event.target.dataset.id));
+            });
+        }
+
+        function addIndividualNote() {
+            const title = newNoteTitleInput.value.trim();
+            const content = newNoteContentInput.value.trim();
+
+            if (!title && !content) {
+                showCustomModal('Missing Information', 'Please enter a title or content for your note.');
+                return;
+            }
+
+            individualNotes.push({ id: generateUniqueId(), title: title, content: content });
+            newNoteTitleInput.value = '';
+            newNoteContentInput.value = '';
+            saveToLocalStorage();
+            renderIndividualNotes();
+        }
+
+        async function deleteIndividualNote(id) {
+            const confirmed = await showCustomModal(
+                'Delete Note',
+                'Are you sure you want to delete this note?',
+                true
+            );
+            if (confirmed) {
+                const index = individualNotes.findIndex(note => note.id === id);
+                if (index !== -1) {
+                    individualNotes.splice(index, 1);
+                    saveToLocalStorage();
+                    renderIndividualNotes();
+                }
+            }
+        }
+
+        function editIndividualNote(id) {
+            const noteToEdit = individualNotes.find(note => note.id === id);
+            if (!noteToEdit) return;
+
+            showCustomModal(
+                'Edit Note',
+                `
+                <div class="flex flex-col gap-3">
+                    <label for="edit-note-title" class="block text-sm font-medium text-gray-300 text-left">Title:</label>
+                    <input type="text" id="edit-note-title" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 w-full" value="${noteToEdit.title}">
+                    <label for="edit-note-content" class="block text-sm font-medium text-gray-300 text-left">Content:</label>
+                    <textarea id="edit-note-content" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 w-full min-h-[100px]">${noteToEdit.content}</textarea>
+                </div>
+                `,
+                true // isConfirm = true, to show "OK" and "Cancel"
+            ).then(result => {
+                if (result) {
+                    const editedTitle = document.getElementById('edit-note-title').value.trim();
+                    const editedContent = document.getElementById('edit-note-content').value.trim();
+
+                    if (!editedTitle && !editedContent) {
+                         showCustomModal('Invalid Input', 'Note cannot be empty. Please enter a title or content.');
+                         return;
+                    }
+
+                    noteToEdit.title = editedTitle;
+                    noteToEdit.content = editedContent;
+                    saveToLocalStorage();
+                    renderIndividualNotes();
+                }
+            });
+        }
+
+
+        // --- Goals Functions ---
+        function renderGoals() {
+            goalsContainer.innerHTML = '';
+            if (studyGoals.length === 0) {
+                goalsContainer.innerHTML = '<p class="text-gray-400 text-center text-sm">No goals added yet.</p>';
+                return;
+            }
+
+            studyGoals.forEach(goal => {
+                const goalDiv = document.createElement('div');
+                goalDiv.className = `goal-item ${goal.completed ? 'completed' : ''}`;
+
+                const dueDateText = goal.dueDate ? ` (Due: ${new Date(goal.dueDate).toLocaleDateString()})` : '';
+                const priorityClass = goal.priority ? goal.priority.toLowerCase() : 'medium'; // Default to medium if not set
+
+                goalDiv.innerHTML = `
+                    <input type="checkbox" data-id="${goal.id}" ${goal.completed ? 'checked' : ''}
+                           class="form-checkbox h-5 w-5 text-purple-600 rounded border-gray-300 focus:ring-purple-500">
+                    <span class="font-semibold text-gray-100 goal-text">${goal.name}</span>
+                    <span class="priority-tag ${priorityClass}">${goal.priority || 'Medium'}</span>
+                    <span class="due-date">${dueDateText}</span>
+                    <button class="delete-goal-btn bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-2 rounded-full text-xs" data-id="${goal.id}">
+                        Delete
+                    </button>
+                    ${goal.description ? `<span class="goal-description">${goal.description}</span>` : ''}
+                `;
+                goalsContainer.appendChild(goalDiv);
+            });
+
+            document.querySelectorAll('.goal-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => toggleGoalCompletion(event.target.dataset.id));
+            });
+            document.querySelectorAll('.delete-goal-btn').forEach(button => {
+                button.addEventListener('click', (event) => deleteGoal(event.target.closest('.goal-item').querySelector('input[type="checkbox"]').dataset.id));
+            });
+        }
+
+        function addGoal() {
+            const goalName = newGoalNameInput.value.trim();
+            const goalDescription = newGoalDescriptionInput.value.trim(); // Get description
+            const goalPriority = newGoalPriorityInput.value; // Get priority
+            const goalDueDate = newGoalDueDateInput.value; //YYYY-MM-DD format
+            if (goalName) {
+                studyGoals.push({
+                    id: generateUniqueId(),
+                    name: goalName,
+                    description: goalDescription, // Save description
+                    priority: goalPriority,     // Save priority
+                    dueDate: goalDueDate,
+                    completed: false
+                });
+                newGoalNameInput.value = '';
+                newGoalDescriptionInput.value = ''; // Clear description
+                newGoalPriorityInput.value = 'Medium'; // Reset priority
+                newGoalDueDateInput.value = '';
+                saveToLocalStorage();
+                renderGoals();
+            } else {
+                showCustomModal('Missing Information', 'Please enter a goal name.');
+            }
+        }
+
+        function toggleGoalCompletion(id) {
+            const goalIndex = studyGoals.findIndex(goal => goal.id === id);
+            if (goalIndex !== -1) {
+                studyGoals[goalIndex].completed = !studyGoals[goalIndex].completed;
+                saveToLocalStorage();
+                renderGoals();
+            }
+        }
+
+        async function deleteGoal(id) {
+            const confirmed = await showCustomModal(
+                'Delete Goal',
+                'Are you sure you want to delete this goal?',
+                true
+            );
+            if (confirmed) {
+                const goalIndex = studyGoals.findIndex(goal => goal.id === id);
+                if (goalIndex !== -1) {
+                    studyGoals.splice(goalIndex, 1);
+                    saveToLocalStorage();
+                    renderGoals();
+                }
+            }
+        }
+
+        // --- Resources Functions ---
+        function renderResources() {
+            resourcesContainer.innerHTML = '';
+            if (studyResources.length === 0) {
+                resourcesContainer.innerHTML = '<p class="text-gray-400 text-center text-sm">No resources added yet.</p>';
+                return;
+            }
+
+            studyResources.forEach(resource => {
+                const resourceDiv = document.createElement('div');
+                resourceDiv.className = `resource-item`;
+                resourceDiv.innerHTML = `
+                    <a href="${resource.url}" target="_blank" rel="noopener noreferrer" class="font-semibold text-blue-400 hover:text-blue-300">
+                        ${resource.title}
+                    </a>
+                    <button class="delete-resource-btn bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-2 rounded-full text-xs" data-id="${resource.id}">
+                        Delete
+                    </button>
+                `;
+                resourcesContainer.appendChild(resourceDiv);
+            });
+
+            document.querySelectorAll('.delete-resource-btn').forEach(button => {
+                button.addEventListener('click', (event) => deleteResource(event.target.dataset.id));
+            });
+        }
+
+        function addResource() {
+            const title = newResourceTitleInput.value.trim();
+            let url = newResourceUrlInput.value.trim();
+
+            if (!title || !url) {
+                showCustomModal('Missing Information', 'Please enter both a title and a URL for the resource.');
+                return;
+            }
+
+            // Basic URL validation and add protocol if missing
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url; // Default to https
+            }
+
+            try {
+                new URL(url); // Check if it's a valid URL format
+            } catch (e) {
+                showCustomModal('Invalid URL', 'Please enter a valid URL (e.g., https://example.com).');
+                return;
+            }
+
+            studyResources.push({ id: generateUniqueId(), title: title, url: url });
+            newResourceTitleInput.value = '';
+            newResourceUrlInput.value = '';
+            saveToLocalStorage();
+            renderResources();
+        }
+
+        async function deleteResource(id) {
+            const confirmed = await showCustomModal(
+                'Delete Resource',
+                'Are you sure you want to delete this resource?',
+                true
+            );
+            if (confirmed) {
+                const resourceIndex = studyResources.findIndex(resource => resource.id === id);
+                if (resourceIndex !== -1) {
+                    studyResources.splice(resourceIndex, 1);
+                    saveToLocalStorage();
+                    renderResources();
+                }
+            }
+        }
+
+
+        // --- Main Mode Switching Functions (Stopwatch/Pomodoro/Stats) ---
+
+        /**
+         * Shows the selected mode view (stopwatch, pomodoro, or stats) within the main tracker.
+         * Hides other views.
+         * @param {string} mode - 'stopwatch', 'pomodoro', or 'stats'.
+         */
+        function showMainModeView(mode) {
+            stopwatchView.classList.add('hidden');
+            pomodoroView.classList.add('hidden');
+            statsView.classList.add('hidden');
+
+            modeStopwatchBtn.classList.remove('active-mode');
+            modePomodoroBtn.classList.remove('active-mode');
+            modeStatsSubBtn.classList.remove('active-mode');
+
+            if (mode === 'stopwatch') {
+                stopwatchView.classList.remove('hidden');
+                modeStopwatchBtn.classList.add('active-mode');
+            } else if (mode === 'pomodoro') {
+                pomodoroView.classList.remove('hidden');
+                modePomodoroBtn.classList.add('active-mode');
+                // Ensure pomodoro display is updated when shown
+                updatePomodoroDisplay();
+            } else if (mode === 'stats') {
+                statsView.classList.remove('hidden');
+                modeStatsSubBtn.classList.add('active-mode');
+                // Ensure stats are re-rendered if needed (recalculateStats already calls renderStats)
+                renderStats();
+            }
+            currentDisplayMode = mode;
+
+            // Pause any running timer when switching modes within the main tracker
+            if (isRunning) stopTimer();
+            if (pomodoroIsRunning) pausePomodoroTimer();
+        }
+
+
+        // --- Top-level Tab Switching Functions ---
+
+        /**
+         * Shows the selected top-level tab and hides others.
+         * @param {string} tabId - ID of the tab section (e.g., 'main-tracker-section', 'notepad-section').
+         */
+        function showTab(tabId) {
+            // Hide all main content sections
+            mainTrackerSection.classList.add('hidden');
+            notepadSection.classList.add('hidden');
+            statsSection.classList.add('hidden'); // This is the advanced stats tab
+            goalsSection.classList.add('hidden');
+            resourcesSection.classList.add('hidden');
+            aboutSection.classList.add('hidden'); // New about section
+            comingSoonSection.classList.add('hidden'); // New coming soon section
+
+            // Show the selected section
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Update active state for main navigation buttons
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            // This handles mapping section IDs to nav button IDs correctly
+            document.getElementById(`nav-${tabId.replace('-section', '').replace('main-tracker', 'study-tracker').replace('stats', 'stats-main').replace('coming-soon', 'coming-soon')}`).classList.add('active');
+
+
+            // Special handling for the main tracker to manage stopwatch/pomodoro/stats sub-views
+            if (tabId === 'main-tracker-section') {
+                // When coming back to main-tracker-section, show the last active mode
+                showMainModeView(currentDisplayMode);
+            } else {
+                // Ensure timers are stopped if not on the main tracker page
+                if (isRunning) stopTimer();
+                if (pomodoroIsRunning) pausePomodoroTimer();
+            }
+        }
+
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', stopTimer);
+        addLogBtn.addEventListener('click', addSessionToLog);
+        clearLogBtn.addEventListener('click', clearAllSessions);
+        setDailyGoalBtn.addEventListener('click', openGoalModal);
+
+        prevLogBtn.addEventListener('click', scrollLogPrev);
+        nextLogBtn.addEventListener('click', scrollLogNext);
+
+        // Pomodoro Buttons
+        pomodoroStartBtn.addEventListener('click', startPomodoroTimer);
+        pomodoroPauseBtn.addEventListener('click', pausePomodoroTimer);
+        pomodoroResetBtn.addEventListener('click', resetPomodoroTimer);
+        pomodoroSkipBtn.addEventListener('click', skipPomodoroPhase);
+        savePomodoroSettingsBtn.addEventListener('click', savePomodoroSettings); // New listener for settings
+
+
+        // Mode Switchers within Study Tracker Tab
+        modeStopwatchBtn.addEventListener('click', () => showMainModeView('stopwatch'));
+        modePomodoroBtn.addEventListener('click', () => showMainModeView('pomodoro'));
+        modeStatsSubBtn.addEventListener('click', () => showMainModeView('stats'));
+
+
+        // Edit Modal Listeners
+        editModalCloseBtn.addEventListener('click', closeEditModal);
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        saveEditBtn.addEventListener('click', saveEditedSession);
+
+        // Goal Modal Listeners
+        goalModalCloseBtn.addEventListener('click', closeGoalModal);
+        cancelGoalBtn.addEventListener('click', closeGoalModal);
+        saveGoalBtn.addEventListener('click', saveGoalTimes);
+
+        // Custom Modal Close Listener
+        customModalCloseBtn.addEventListener('click', () => customModalOverlay.classList.add('hidden'));
+
+        // Top-level Tab navigation listeners
+        navStudyTracker.addEventListener('click', () => showTab('main-tracker-section'));
+        navNotepad.addEventListener('click', () => showTab('notepad-section'));
+        // navStatsMain.addEventListener('click', () => showTab('stats-section')); // Removed as button is removed
+        navGoals.addEventListener('click', () => showTab('goals-section'));
+        navResources.addEventListener('click', () => showTab('resources-section'));
+        navAbout.addEventListener('click', () => showTab('about-section')); // New about tab
+        navComingSoon.addEventListener('click', () => showTab('coming-soon-section')); // New coming soon tab
+
+
+        // Checklist event listeners
+        addChecklistItemBtn.addEventListener('click', addChecklistItem);
+        newChecklistItemInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                addChecklistItem();
+            }
+        });
+
+        // Notes (Individual) event listeners
+        addNoteBtn.addEventListener('click', addIndividualNote);
+        newNoteTitleInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && (newNoteTitleInput.value.trim() !== '' || newNoteContentInput.value.trim() !== '')) {
+                addIndividualNote();
+            }
+        });
+        newNoteContentInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && (newNoteTitleInput.value.trim() !== '' || newNoteContentInput.value.trim() !== '')) {
+                if (!event.shiftKey) { // Allow Shift+Enter for new line
+                    addIndividualNote();
+                    event.preventDefault(); // Prevent default Enter behavior (e.g., new line in textarea)
+                }
+            }
+        });
+
+
+        // Goals event listeners
+        addGoalBtn.addEventListener('click', addGoal);
+        newGoalNameInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && newGoalNameInput.value.trim() !== '') {
+                addGoal();
+            }
+        });
+        newGoalDescriptionInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && newGoalNameInput.value.trim() !== '') {
+                addGoal();
+            }
+        });
+        newGoalDueDateInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && newGoalNameInput.value.trim() !== '') {
+                addGoal();
+            }
+        });
+
+
+        // Resources event listeners
+        addResourceBtn.addEventListener('click', addResource);
+        newResourceTitleInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && newResourceUrlInput.value.trim() !== '') {
+                addResource();
+            }
+        });
+        newResourceUrlInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && newResourceTitleInput.value.trim() !== '') {
+                addResource();
+            }
+        });
+
+
+        // --- Keyboard Shortcuts ---
+        document.addEventListener('keydown', (event) => {
+            // Prevent hotkeys from firing if an input field is focused
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') {
+                return;
+            }
+
+            // Only apply stopwatch/pomodoro shortcuts if on the main tracker section
+            if (document.getElementById('main-tracker-section').classList.contains('hidden') === false) {
+                if (currentDisplayMode === 'stopwatch') {
+                    if (event.key === 's' || event.key === 'S') {
+                        if (!startBtn.classList.contains('hidden')) {
+                            startBtn.click();
+                        }
+                    } else if (event.key === 'p' || event.key === 'P') {
+                        if (!stopBtn.classList.contains('hidden')) {
+                            stopBtn.click();
+                        }
+                    } else if (event.key === 'l' || event.key === 'L') {
+                        if (!addLogBtn.disabled) {
+                            addLogBtn.click();
+                        }
+                    }
+                } else if (currentDisplayMode === 'pomodoro') {
+                    if (event.key === 's' || event.key === 'S') { // Reuse 'S' for start in Pomodoro
+                         if (!pomodoroStartBtn.classList.contains('hidden')) {
+                            pomodoroStartBtn.click();
+                        }
+                    } else if (event.key === 'p' || event.key === 'P') { // Reuse 'P' for pause in Pomodoro
+                         if (!pomodoroPauseBtn.classList.contains('hidden')) {
+                            pomodoroPauseBtn.click();
+                        }
+                    } else if (event.key === 'r' || event.key === 'R') { // 'R' for reset
+                        pomodoroResetBtn.click();
+                    } else if (event.key === 'k' || event.key === 'K') { // 'K' for skip
+                        pomodoroSkipBtn.click();
+                    }
+                }
+            }
+
+
+            // Log navigation shortcuts (independent of mode or main tab)
+            if (event.key === 'ArrowLeft') {
+                 scrollLogPrev();
+            } else if (event.key === 'ArrowRight') {
+                 scrollLogNext();
+            }
+        });
+
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            populateHourDropdowns(); // Populate hour dropdowns first
+            loadFromLocalStorage();
+            renderStats();
+            renderLog();
+            renderChecklist();
+            renderGoals();
+            renderResources();
+            setStopwatchButtonStates(); // Set initial state for stopwatch buttons
+            updatePomodoroDisplay(); // Initial display for Pomodoro timer
+
+            // Set initial tab to Study Tracker and show its default mode (stopwatch)
+            showTab('main-tracker-section');
+            showMainModeView('stopwatch'); // Explicitly show stopwatch as default sub-tab
+            navStudyTracker.classList.add('active'); // Ensure main nav button is active
+
+            // Check if goal has been set, otherwise prompt
+            const hasSetGoal = localStorage.getItem('hasSetGoal');
+            if (!hasSetGoal) {
+                openGoalModal();
+            }
+        });
+    </script>
+</body>
+</html>
