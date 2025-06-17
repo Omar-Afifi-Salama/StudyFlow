@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyFlow</title>
+    <title>Study Time Tracker</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom CSS for basic layout and scrollbar */
+        /* Base styles for body - dynamic themes will override these */
         body {
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s, color 0.3s;
-            background-color: #1a202c; /* Dark background by default */
-            color: #e2e8f0; /* Light text by default */
-            /* Removed overflow: hidden; to allow natural scrolling */
-
-            /* Background animation */
-            background: linear-gradient(45deg, #1a202c, #2d3748, #1a202c);
+            background-color: var(--bg-primary, #1a202c);
+            color: var(--text-primary, #e2e8f0);
+            min-height: 100vh;
+            overflow-y: auto;
+            /* Background animation - adjust colors based on active theme */
+            background: linear-gradient(45deg, var(--bg-primary-gradient-start, #1a202c), var(--bg-primary-gradient-middle, #2d3748), var(--bg-primary-gradient-end, #1a202c));
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
         }
@@ -27,6 +27,195 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* Default Dark Theme Variables */
+        body.default-dark-skin {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-tertiary: #374151; /* For elements like checklist item background */
+            --text-primary: #e2e8f0;
+            --text-secondary: #cbd5e0; /* Gray-300 */
+            --accent-blue: #4299e1; /* Blue-500 */
+            --accent-green: #48bb78; /* Green-500 */
+            --accent-yellow: #f6e05e; /* Yellow-400 */
+            --accent-red: #fc8181; /* Red-400 */
+            --accent-purple: #9f7aea; /* Purple-400 */
+            --border-color: #4a5568; /* Gray-600 */
+            --xp-fill-color: #63b3ed; /* Blue-400 */
+            --sponsor-bg: #000000;
+            --sponsor-border: #cc0000;
+            --sponsor-highlight: #cc0000;
+            --bg-primary-gradient-start: #1a202c;
+            --bg-primary-gradient-middle: #2d3748;
+            --bg-primary-gradient-end: #1a202c;
+        }
+
+        /* Default Light Theme Variables */
+        body.default-light-skin {
+            --bg-primary: #f0f4f8; /* Light gray-blue */
+            --bg-secondary: #e2e8f0; /* Lighter gray-blue */
+            --bg-tertiary: #ffffff; /* White for item backgrounds */
+            --text-primary: #2d3748; /* Dark text */
+            --text-secondary: #4a5568; /* Darker gray text */
+            --accent-blue: #3182ce; /* Stronger blue */
+            --accent-green: #38a169; /* Stronger green */
+            --accent-yellow: #ecc94b; /* Stronger yellow */
+            --accent-red: #e53e3e; /* Stronger red */
+            --accent-purple: #805ad5; /* Stronger purple */
+            --border-color: #a0aec0; /* Lighter gray border */
+            --xp-fill-color: #4299e1; /* Blue-500 */
+            --sponsor-bg: #000000; /* Keep sponsor colors consistent */
+            --sponsor-border: #cc0000;
+            --sponsor-highlight: #cc0000;
+            background: linear-gradient(45deg, #f0f4f8, #e2e8f0, #f0f4f8);
+        }
+
+        /* Forest Dream Skin */
+        body.forest-dream-skin {
+            --bg-primary: #1e3a24; /* Dark forest green */
+            --bg-secondary: #2d5736; /* Slightly lighter, richer green */
+            --bg-tertiary: #3c7d49; /* Even lighter green for interactive elements */
+            --text-primary: #e6ffe0; /* Very light, soft green */
+            --text-secondary: #b3d8a7; /* Muted light green */
+            --accent-blue: #6aa84f; /* Olive green */
+            --accent-green: #90ee90; /* Pale green (for accents) */
+            --accent-yellow: #d4a75e; /* Earthy brown-yellow */
+            --accent-red: #c25c5c; /* Muted red */
+            --accent-purple: #8c73a0; /* Dusky purple */
+            --border-color: #4f6b53; /* Darker green border */
+            --xp-fill-color: #79c063; /* Light green for XP bar */
+            --sponsor-bg: #000000;
+            --sponsor-border: #cc0000;
+            --sponsor-highlight: #cc0000;
+            background: linear-gradient(45deg, #1e3a24, #2d5736, #1e3a24);
+        }
+
+        /* Ocean Breeze Skin */
+        body.ocean-breeze-skin {
+            --bg-primary: #0a1f2e; /* Very dark blue, deep ocean */
+            --bg-secondary: #1a3a54; /* Slightly lighter, more vibrant blue */
+            --bg-tertiary: #2b577d; /* Medium blue for interactive elements */
+            --text-primary: #e0faff; /* Very light, almost white blue */
+            --text-secondary: #a7d9ed; /* Muted light blue */
+            --accent-blue: #42a5f5; /* Bright sky blue */
+            --accent-green: #68b2a1; /* Teal-green, like shallow water */
+            --accent-yellow: #fdd835; /* Sunny yellow */
+            --accent-red: #ef5350; /* Coral red */
+            --accent-purple: #906cbf; /* Deep lavender */
+            --border-color: #3b6b8e; /* Muted blue border */
+            --xp-fill-color: #64b5f6; /* Bright blue for XP bar */
+            --sponsor-bg: #000000;
+            --sponsor-border: #cc0000;
+            --sponsor-highlight: #cc0000;
+            background: linear-gradient(45deg, #0a1f2e, #1a3a54, #0a1f2e);
+        }
+
+        /* Midnight Violet Skin */
+        body.midnight-violet-skin {
+            --bg-primary: #210a30; /* Very dark purple, almost black */
+            --bg-secondary: #3b1b52; /* Richer, deeper purple */
+            --bg-tertiary: #5a2e7c; /* Brighter purple for interactive elements */
+            --text-primary: #f0e6ff; /* Very light, soft purple */
+            --text-secondary: #c9b0e2; /* Muted light purple */
+            --accent-blue: #b39ddb; /* Lavender blue */
+            --accent-green: #a7d88c; /* Muted green */
+            --accent-yellow: #ffeb3b; /* Bright yellow */
+            --accent-red: #ef9a9a; /* Light red */
+            --accent-purple: #d1c4e9; /* Very light purple (for accents) */
+            --border-color: #4d316d; /* Dark purple border */
+            --xp-fill-color: #a787d9; /* Medium purple for XP bar */
+            --sponsor-bg: #000000;
+            --sponsor-border: #cc0000;
+            --sponsor-highlight: #cc0000;
+            background: linear-gradient(45deg, #210a30, #3b1b52, #210a30);
+        }
+
+
+        /* Apply theme variables to general elements */
+        .bg-gray-800 { background-color: var(--bg-secondary); }
+        .bg-gray-700 { background-color: var(--bg-tertiary); }
+        .bg-gray-900 { background-color: var(--bg-secondary); } /* Nav and some backgrounds */
+        .text-gray-100 { color: var(--text-primary); }
+        .text-gray-200 { color: var(--text-primary); }
+        .text-gray-300 { color: var(--text-secondary); }
+        .text-gray-400 { color: var(--text-secondary); }
+        .text-gray-600 { color: var(--text-secondary); } /* For borders */
+        .border-gray-600 { border-color: var(--border-color); }
+        .border-gray-700 { border-color: var(--border-color); }
+
+        .nav-button, .mode-button {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        .nav-button:hover, .mode-button:hover {
+            background-color: var(--border-color);
+        }
+        .nav-button.active {
+            background-color: var(--border-color);
+        }
+
+        .mode-button.active-mode {
+            background-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue);
+        }
+
+        #xp-bar-outer { background-color: var(--bg-secondary); }
+        #xp-bar-fill { background-color: var(--xp-fill-color); }
+        #xp-info { color: var(--text-primary); } /* Text over XP bar */
+        #level-display { color: var(--text-secondary); } /* Level title */
+        #cash-display { color: var(--accent-green); } /* Cash color */
+
+        /* Specific element color overrides for theme */
+        #stopwatch-display { color: var(--accent-blue); }
+        #pomodoro-timer-display { color: var(--accent-green); }
+        .bg-blue-500 { background-color: var(--accent-blue); }
+        .bg-yellow-500 { background-color: var(--accent-yellow); }
+        .bg-red-500 { background-color: var(--accent-red); }
+        .bg-green-500 { background-color: var(--accent-green); }
+        .bg-indigo-500 { background-color: var(--accent-purple); }
+        /* Add hover styles for new buttons based on var */
+        .bg-blue-500:hover { background-color: color-mix(in srgb, var(--accent-blue) 80%, black); }
+        .bg-yellow-500:hover { background-color: color-mix(in srgb, var(--accent-yellow) 80%, black); }
+        .bg-red-500:hover { background-color: color-mix(in srgb, var(--accent-red) 80%, black); }
+        .bg-green-500:hover { background-color: color-mix(in srgb, var(--accent-green) 80%, black); }
+        .bg-indigo-500:hover { background-color: color-mix(in srgb, var(--accent-purple) 80%, black); }
+
+        /* Notepad box backgrounds */
+        #notepad-section .box-container {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        #notepad-section .checklist-box { background-color: var(--bg-tertiary); border-color: var(--accent-blue); }
+        #notepad-section .notes-box { background-color: var(--bg-tertiary); border-color: var(--accent-green); }
+        #notepad-section .goals-box { background-color: var(--bg-tertiary); border-color: var(--accent-purple); }
+        #notepad-section .resources-box { background-color: var(--bg-tertiary); border-color: var(--accent-red); }
+
+        /* Shop section styles */
+        .shop-skin-card {
+            background-color: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .shop-skin-card.locked {
+            filter: grayscale(0.8) brightness(0.7);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .shop-skin-card.current-skin {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue);
+        }
+        .shop-skin-card button {
+            background-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+        .shop-skin-card button:hover:not(:disabled) {
+            background-color: color-mix(in srgb, var(--accent-blue) 80%, black);
+        }
+        .shop-skin-card button:disabled {
+            background-color: var(--border-color);
+            cursor: not-allowed;
+        }
+
 
         /* Scrollbar styling */
         .scrollbar-hide::-webkit-scrollbar {
@@ -35,6 +224,42 @@
         .scrollbar-hide {
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Custom scrollbar for better visibility */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 4px;
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: var(--text-secondary);
+        }
+
+        /* Apply custom-scrollbar to relevant containers */
+        #checklist-items-container,
+        #notes-list-container,
+        #resources-container,
+        #goals-container,
+        #study-log-entries,
+        #chat-window,
+        #shop-skins-container,
+        #investment-list-container,
+        #page-editor-textarea, /* No longer used but kept for safety */
+        #page-preview { /* No longer used but kept for safety */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
         }
 
         /* Modal specific styles */
@@ -52,14 +277,14 @@
         }
 
         .modal-content {
-            background-color: #2d3748; /* Dark modal background */
+            background-color: var(--bg-secondary);
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             max-width: 90%;
             width: 500px;
-            color: #e2e8f0; /* Light text in modal */
-            position: relative; /* For close button positioning */
+            color: var(--text-primary);
+            position: relative;
         }
 
         .modal-close-btn {
@@ -69,7 +294,7 @@
             background: none;
             border: none;
             font-size: 1.5rem;
-            color: #e2e8f0;
+            color: var(--text-primary);
             cursor: pointer;
             line-height: 1;
         }
@@ -78,20 +303,24 @@
         .checklist-item {
             display: flex;
             align-items: center;
-            background-color: #374151; /* gray-700 */
+            background-color: var(--bg-tertiary);
             padding: 0.75rem;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
             gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .checklist-item:last-child {
+            border-bottom: none;
         }
 
         .checklist-item.completed span {
             text-decoration: line-through;
-            color: #9ca3af; /* gray-400 */
+            color: var(--text-secondary);
         }
         .checklist-item input[type="checkbox"] {
-            min-width: 1.25rem; /* Ensure checkbox doesn't shrink */
-            min-height: 1.25rem; /* Ensure checkbox doesn't shrink */
+            min-width: 1.25rem;
+            min-height: 1.25rem;
             cursor: pointer;
         }
 
@@ -99,17 +328,21 @@
         .goal-item {
             display: flex;
             align-items: center;
-            flex-wrap: wrap; /* Allow wrapping for smaller screens */
-            background-color: #374151; /* gray-700 */
+            flex-wrap: wrap;
+            background-color: var(--bg-tertiary);
             padding: 0.75rem;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
             gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .goal-item:last-child {
+            border-bottom: none;
         }
         .goal-item.completed span.goal-text,
         .goal-item.completed span.goal-description {
             text-decoration: line-through;
-            color: #9ca3af; /* gray-400 */
+            color: var(--text-secondary);
         }
         .goal-item input[type="checkbox"] {
             min-width: 1.25rem;
@@ -117,41 +350,44 @@
             cursor: pointer;
         }
         .goal-item .due-date {
-            font-size: 0.75rem; /* text-xs */
-            color: #a0aec0; /* gray-400 */
-            margin-left: auto; /* Push to right */
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-left: auto;
         }
         .goal-item .priority-tag {
             font-size: 0.75rem;
             padding: 0.2rem 0.5rem;
             border-radius: 0.5rem;
             font-weight: bold;
-            color: #1a202c; /* dark text for tags */
+            color: var(--bg-primary); /* dark text for tags, contrast with tag background */
         }
-        .priority-tag.low { background-color: #f6e05e; /* yellow */ }
-        .priority-tag.medium { background-color: #63b3ed; /* blue */ }
-        .priority-tag.high { background-color: #fc8181; /* red */ }
+        .priority-tag.low { background-color: var(--accent-yellow); }
+        .priority-tag.medium { background-color: var(--accent-blue); color: white;} /* White text for contrast */
+        .priority-tag.high { background-color: var(--accent-red); color: white;} /* White text for contrast */
         .goal-description {
-            font-size: 0.875rem; /* text-sm */
-            color: #cbd5e0; /* gray-300 */
-            width: 100%; /* Take full width on next line */
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            width: 100%;
             margin-top: 0.25rem;
-            padding-left: calc(1.25rem + 0.75rem); /* Align with checkbox text */
+            padding-left: calc(1.25rem + 0.75rem);
         }
-
 
         /* Resource item styling */
         .resource-item {
             display: flex;
             align-items: center;
-            background-color: #374151; /* gray-700 */
+            background-color: var(--bg-tertiary);
             padding: 0.75rem;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
             gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .resource-item:last-child {
+            border-bottom: none;
         }
         .resource-item a {
-            color: #63b3ed; /* blue-400 */
+            color: var(--accent-blue);
             text-decoration: none;
             flex-grow: 1;
             white-space: nowrap;
@@ -161,19 +397,18 @@
         .resource-item a:hover {
             text-decoration: underline;
         }
-
-        /* Navbar & Mode Button Active/Hover effects */
-        .nav-button, .mode-button, button {
-            transition: all 0.2s ease-in-out;
+        /* Note item styling */
+        .note-item {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-tertiary);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
         }
-
-        .nav-button.active {
-            background-color: #4a5568; /* Tailwind gray-700 for active tab */
-        }
-
-        .mode-button.active-mode {
-            background-color: #2c5282; /* Darker blue for active mode */
-            box-shadow: 0 0 0 3px #4299e1; /* Ring-blue-500 */
+        .note-item:last-child {
+            border-bottom: none;
         }
 
         /* Tab content transition for fluidity */
@@ -181,27 +416,25 @@
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-            position: absolute; /* Allows overlaying during transition */
+            position: absolute;
             width: 100%;
-            height: 100%;
             top: 0;
             left: 0;
-            pointer-events: none; /* Disable interaction when hidden */
-            overflow-y: auto; /* Allow internal scrolling if content is too tall */
-            padding-bottom: 20px; /* Ensure space for scrollbar/bottom content */
+            pointer-events: none;
+            overflow-y: auto;
+            padding-bottom: 20px;
         }
 
         .tab-content.active {
             opacity: 1;
             transform: translateY(0);
-            position: static; /* Take up space when active */
-            pointer-events: auto; /* Enable interaction when active */
+            position: static;
+            pointer-events: auto;
         }
         /* Ensure specific sections are relative to their parent for absolute positioning of content */
-        #main-tracker-section, #notepad-section, #stats-section, #goals-section, #resources-section, #about-section, #coming-soon-section, #sponsor-section { /* Added #sponsor-section */
-            /* Removed max-height here to allow content to dictate height */
-            min-height: 500px; /* Or a suitable minimum */
-            box-sizing: border-box; /* Include padding in element's total width and height */
+        #main-tracker-section, #notepad-section, #shop-section, #capitalist-section, #about-section, #ai-assistant-section {
+            min-height: 500px;
+            box-sizing: border-box;
         }
         /* Confetti animation */
         .confetti {
@@ -224,99 +457,186 @@
                 transform: translate(var(--x), var(--y)) rotate(var(--rotate, 720deg));
             }
         }
+
+        /* Floating Text for XP/Cash gain */
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            animation: floatAndFade 1.5s forwards ease-out;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        @keyframes floatAndFade {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+
         /* Desktop specific adjustments for About/Coming Soon */
         @media (min-width: 1024px) { /* lg breakpoint */
             #about-section .text-center > p,
             #about-section .text-center ul,
-            #coming-soon-section > div,
-            #coming-soon-section > p {
-                max-width: 800px; /* Constrain width for readability */
+            #about-section .coming-soon-content,
+            #about-section .sponsor-content {
+                max-width: 800px;
                 margin-left: auto;
                 margin-right: auto;
-                text-align: left; /* Ensure text alignment is left for readability */
+                text-align: left;
             }
-            #about-section .text-center { /* Re-center the wrapper */
+            #about-section .text-center {
                 text-align: center;
             }
         }
-        /* XP Bar Styling */
-        #xp-bar-container {
+        /* Sponsor section specific styles (Fixed colors as requested) */
+        .sponsor-card {
+            background-color: #000000;
+            color: #ffffff;
+            border: 2px solid #cc0000;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 600px;
             width: 100%;
-            max-width: 300px; /* Decreased width a lot */
-            background-color: #2d3748; /* Darker gray */
-            border-radius: 9999px; /* Full rounded */
-            height: 0.75rem; /* Thinner */
-            /* margin-top: 1rem; Removed as it's now inside the main tracker box */
-            /* margin-bottom: 2rem; Removed as it's now inside the main tracker box */
-            overflow: hidden; /* Hide overflow of inner bar */
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-            position: relative;
-            align-self: center; /* Center horizontally within flex parent */
-            margin-bottom: 1rem; /* Space between bar and timer */
+        }
+        @media (min-width: 768px) {
+            .sponsor-card {
+                flex-direction: row;
+                gap: 2.5rem;
+                max-width: 800px;
+            }
+        }
+        .sponsor-card hr {
+            border-color: #cc0000;
+            width: 80%;
+            margin: 1rem auto;
+        }
+        @media (min-width: 768px) {
+            .sponsor-card hr {
+                display: none;
+            }
+            .sponsor-card::before {
+                content: '';
+                position: absolute;
+                left: 50%;
+                top: 10%;
+                bottom: 10%;
+                width: 2px;
+                background-color: #cc0000;
+                transform: translateX(-50%);
+            }
+        }
+        .sponsor-title-ar, .sponsor-text-ar {
+            color: #ffffff;
+        }
+        .sponsor-title-en, .sponsor-text-en {
+            color: #ffffff;
+        }
+        .sponsor-highlight-ar, .sponsor-highlight-en {
+            color: #cc0000;
+            font-weight: bold;
         }
 
-        #xp-bar-fill {
-            height: 100%;
-            background-color: #63b3ed; /* Blue-400 */
-            width: 0%; /* Initial width */
-            border-radius: 9999px;
-            transition: width 0.5s ease-in-out;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end; /* Push text to the right if possible */
-            padding-right: 0.5rem;
-            box-sizing: border-box;
-            color: #1a202c; /* Dark text for contrast */
-            font-weight: bold;
-            font-size: 0.6rem; /* text-xs, even smaller for thin bar */
-            white-space: nowrap; /* Prevent text wrapping */
+        /* AI Assistant specific styles */
+        #chat-window {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
         }
-        #xp-info {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #e2e8f0; /* Light text over dark bar */
-            font-weight: bold;
-            font-size: 0.75rem; /* text-sm */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        .chat-message {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        /* Sponsor section specific styles */
-        .sponsor-logo {
-            filter: grayscale(0.5) contrast(1.2); /* Subtle effect */
-            transition: filter 0.3s ease-in-out;
+        .user-message {
+            background-color: var(--accent-blue);
+            color: white;
         }
-        .sponsor-logo:hover {
-            filter: grayscale(0) contrast(1); /* Remove filter on hover */
+        .ai-message {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
         }
+        .spinner {
+            border-top: 4px solid var(--accent-blue);
+        }
+        #gemini-api-key-input, #user-input, #session-name-input, #pomodoro-study-mins-input, #pomodoro-short-break-mins-input, #pomodoro-long-break-mins-input, #ambient-sound-selector, #new-checklist-item-input, #new-note-title-input, #new-note-content-input, #new-goal-name-input, #new-goal-description-input, #new-goal-priority-input, #new-goal-due-date-input, #new-resource-title-input, #new-resource-url-input, #edit-session-name, #edit-duration, #wake-up-hour-input, #wake-up-ampm-input, #bed-hour-input, #bed-ampm-input, #investment-amount-input, #investment-type-select, #investment-duration-select {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        /* Shop skin card specific styling for preview */
+        .shop-skin-preview {
+            width: 100px;
+            height: 60px;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+        .shop-skin-preview.default-dark {
+            background: linear-gradient(45deg, #1a202c, #2d3748);
+        }
+        .shop-skin-preview.default-light {
+            background: linear-gradient(45deg, #f0f4f8, #e2e8f0);
+        }
+        .shop-skin-preview.forest-dream {
+            background: linear-gradient(45deg, #1e3a24, #2d5736);
+        }
+        .shop-skin-preview.ocean-breeze {
+            background: linear-gradient(45deg, #0a1f2e, #1a3a54);
+        }
+        .shop-skin-preview.midnight-violet {
+            background: linear-gradient(45deg, #210a30, #3b1b52);
+        }
+
+        /* Capitalist Game Styles */
+        .investment-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .investment-card .progress-bar {
+            background-color: var(--bg-secondary);
+        }
+        .investment-card .progress-fill {
+            background-color: var(--accent-blue);
+        }
+        .investment-card.matured {
+            border-color: var(--accent-green);
+        }
+        .investment-card.lost {
+            border-color: var(--accent-red);
+        }
+
     </style>
 </head>
-<body class="dark flex flex-col items-center min-h-screen">
+<body class="default-dark-skin flex flex-col items-center min-h-screen">
 
     <!-- Navigation Bar -->
-    <nav class="w-full bg-gray-900 p-4 shadow-lg flex justify-center space-x-4 flex-wrap">
-        <button id="nav-study-tracker" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+    <nav class="w-full p-4 shadow-lg flex justify-center space-x-4 flex-wrap" style="background-color: var(--bg-secondary);">
+        <button id="nav-study-tracker" class="nav-button font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
             Study Tracker
         </button>
-        <button id="nav-notepad" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+        <button id="nav-notepad" class="nav-button font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
             Notepad
         </button>
-        <button id="nav-goals" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
-            Goals
+        <button id="nav-shop" class="nav-button font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Shop
         </button>
-        <button id="nav-resources" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
-            Resources
+        <button id="nav-capitalist" class="nav-button font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            Capitalist
         </button>
-        <button id="nav-about" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+        <button id="nav-about" class="nav-button font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
             About
         </button>
-        <button id="nav-coming-soon" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
-            Coming Soon
-        </button>
-        <button id="nav-sponsor" class="nav-button bg-gray-800 hover:bg-gray-700 text-gray-100 font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
-            Our Sponsor
+        <button id="nav-ai-assistant" class="nav-button font-bold py-2 px-6 rounded-lg transition duration-300 ease-in-out mb-2 lg:mb-0">
+            AI Study Assistant
         </button>
     </nav>
 
@@ -325,26 +645,31 @@
     <div class="flex flex-col items-center justify-center flex-grow p-4 w-full">
 
         <!-- Study Tracker Section (Tab Content) -->
-        <div id="main-tracker-section" class="relative w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl flex flex-col lg:flex-row p-6 space-y-8 lg:space-y-0 lg:space-x-8 tab-content">
+        <div id="main-tracker-section" class="relative w-full max-w-6xl rounded-2xl shadow-xl flex flex-col lg:flex-row p-6 space-y-8 lg:space-y-0 lg:space-x-8 tab-content" style="background-color: var(--bg-secondary);">
 
             <!-- Main Study Timer Area (Stopwatch/Pomodoro/Stats Switch) -->
             <div class="flex-1 flex flex-col items-center p-4">
                 <h1 class="text-4xl font-bold mb-4 text-gray-100">Study Tracker</h1>
-                 <!-- XP Bar Container (seamlessly integrated) -->
-                <div id="xp-bar-container">
-                    <div id="xp-bar-fill"></div>
-                    <div id="xp-info"></div>
+
+                <!-- XP Bar & Cash Wrapper (New Layout) -->
+                <div id="xp-cash-wrapper" class="flex items-center justify-between w-full max-w-xl mb-4">
+                    <div id="level-display" class="text-sm font-bold text-gray-200 mr-2 min-w-[100px] text-left"></div>
+                    <div id="xp-bar-outer" class="flex-grow rounded-full h-2.5 overflow-hidden shadow-inner relative">
+                        <div id="xp-bar-fill" class="h-full rounded-full transition-all duration-500 ease-in-out"></div>
+                        <div id="xp-info" class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-100"></div>
+                    </div>
+                    <div id="cash-display" class="text-sm font-bold ml-2 min-w-[70px] text-right"></div>
                 </div>
 
                 <!-- Mode Selector -->
                 <div class="flex justify-center gap-4 mb-8 mt-4">
-                    <button id="mode-stopwatch-btn" class="mode-button bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
+                    <button id="mode-stopwatch-btn" class="mode-button font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
                         Stopwatch
                     </button>
-                    <button id="mode-pomodoro-btn" class="mode-button bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
+                    <button id="mode-pomodoro-btn" class="mode-button font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
                         Pomodoro
                     </button>
-                    <button id="mode-stats-sub" class="mode-button bg-gray-700 hover:bg-gray-600 text-gray-100 font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
+                    <button id="mode-stats-sub" class="mode-button font-bold py-2 px-6 rounded-full transition duration-300 ease-in-out">
                         Stats
                     </button>
                 </div>
@@ -352,14 +677,14 @@
                 <!-- Stopwatch View -->
                 <div id="stopwatch-view" class="w-full flex flex-col items-center">
                     <!-- Stopwatch Display -->
-                    <div id="stopwatch-display" class="text-8xl font-extrabold text-blue-400 mb-8 select-none">
+                    <div id="stopwatch-display" class="text-8xl font-extrabold mb-8 select-none">
                         00 min 00 s
                     </div>
 
                     <!-- Session Naming Input -->
                     <div class="w-full flex justify-center mb-4">
                         <input type="text" id="session-name-input" placeholder="Enter session name (optional)"
-                               class="p-3 rounded-full border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md">
+                               class="p-3 rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-md">
                     </div>
 
                     <!-- Stopwatch Controls -->
@@ -380,7 +705,7 @@
                 <div id="pomodoro-view" class="w-full flex flex-col items-center hidden">
                     <div class="text-3xl font-semibold mb-2 text-gray-300" id="pomodoro-phase-display">Study Time</div>
                     <div class="text-xl font-bold mb-4 text-gray-400" id="pomodoro-cycle-counter">Pomodoro #0</div>
-                    <div id="pomodoro-timer-display" class="text-8xl font-extrabold text-green-400 mb-8 select-none">
+                    <div id="pomodoro-timer-display" class="text-8xl font-extrabold mb-8 select-none">
                         25:00
                     </div>
                     <div class="flex flex-wrap justify-center gap-4 mb-8">
@@ -399,33 +724,41 @@
                     </div>
 
                     <!-- Pomodoro Settings Toggle Button -->
-                    <button id="toggle-pomodoro-settings-btn" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out mt-4 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    <button id="toggle-pomodoro-settings-btn" class="font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out mt-4 focus:outline-none focus:ring-2 focus:ring-gray-500" style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
                         Customize Pomodoro
                     </button>
 
                     <!-- Pomodoro Settings (Initially hidden) -->
-                    <div id="pomodoro-settings" class="mt-6 w-full max-w-md bg-gray-700 p-4 rounded-lg shadow-inner text-center hidden">
+                    <div id="pomodoro-settings" class="mt-6 w-full max-w-md p-4 rounded-lg shadow-inner text-center hidden" style="background-color: var(--bg-tertiary);">
                         <h3 class="text-xl font-semibold mb-3 text-gray-100">Pomodoro Settings</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
                                 <label for="pomodoro-study-mins-input" class="block text-sm font-medium text-gray-300">Study (min)</label>
                                 <input type="number" id="pomodoro-study-mins-input" value="25" min="1" max="120"
-                                       class="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 text-center">
+                                       class="w-full p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-500 text-center">
                             </div>
                             <div>
                                 <label for="pomodoro-short-break-mins-input" class="block text-sm font-medium text-gray-300">Short Break (min)</label>
                                 <input type="number" id="pomodoro-short-break-mins-input" value="5" min="1" max="30"
-                                       class="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-center">
+                                       class="w-full p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-yellow-500 text-center">
                             </div>
                             <div>
                                 <label for="pomodoro-long-break-mins-input" class="block text-sm font-medium text-gray-300">Long Break (min)</label>
                                 <input type="number" id="pomodoro-long-break-mins-input" value="15" min="1" max="60"
-                                       class="w-full p-2 rounded-md border border-gray-600 bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 text-center">
+                                       class="w-full p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500 text-center">
                             </div>
                         </div>
+                        <!-- Ambient Sound Mixer (Updated) -->
                         <div class="flex items-center justify-center mb-4">
-                            <input type="checkbox" id="ambient-sound-toggle" class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 mr-2">
-                            <label for="ambient-sound-toggle" class="text-gray-300 text-sm">Play Ambient Study Sound</label>
+                            <label for="ambient-sound-selector" class="text-gray-300 text-sm mr-2">Ambient Sound:</label>
+                            <select id="ambient-sound-selector" class="p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="none">None</option>
+                                <option value="rain">Rain</option>
+                                <option value="cafe">Cafe</option>
+                                <option value="ocean">Ocean Waves</option>
+                                <option value="forest">Forest</option>
+                            </select>
+                            <input type="range" id="ambient-volume-slider" min="0" max="1" step="0.1" value="0.3" class="ml-4 w-24 accent-blue-500">
                         </div>
                         <button id="save-pomodoro-settings-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-md transition duration-300 ease-in-out">
                             Save Settings
@@ -455,259 +788,374 @@
 
                 <!-- Set Daily Goal Button (remains in main tracker section) -->
                 <div class="absolute bottom-4 left-4">
-                    <button id="set-daily-goal-btn" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    <button id="set-daily-goal-btn" class="font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500" style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
                         Set Daily Goal
                     </button>
                 </div>
             </div>
 
             <!-- Study Log Section -->
-            <div class="lg:w-1/3 p-4 bg-gray-700 rounded-xl shadow-inner flex flex-col">
+            <div class="lg:w-1/3 p-4 rounded-xl shadow-inner flex flex-col" style="background-color: var(--bg-tertiary);">
                 <h2 class="text-2xl font-bold mb-4 text-gray-100 text-center">Study Log</h2>
                 <div class="flex justify-center gap-2 mb-4">
-                    <button id="prev-log-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-1 px-3 rounded-full transition duration-300 ease-in-out">
+                    <button id="prev-log-btn" class="font-bold py-1 px-3 rounded-full transition duration-300 ease-in-out" style="background-color: var(--border-color); color: var(--text-secondary);">
                         &larr; Prev
                     </button>
-                    <button id="next-log-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-1 px-3 rounded-full transition duration-300 ease-in-out">
+                    <button id="next-log-btn" class="font-bold py-1 px-3 rounded-full transition duration-300 ease-in-out" style="background-color: var(--border-color); color: var(--text-secondary);">
                         Next &rarr;
                     </button>
                 </div>
-                <div id="study-log-entries" class="flex-grow overflow-y-auto scrollbar-hide space-y-6 p-2 max-h-96">
+                <div id="study-log-entries" class="flex-grow overflow-y-auto custom-scrollbar space-y-6 p-2 max-h-96">
                     <!-- Log entries will be inserted here by JavaScript -->
                     <p class="text-gray-300 text-center">No sessions logged yet.</p>
                 </div>
-                <button id="clear-log-btn" class="mt-4 bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out">
+                <button id="clear-log-btn" class="mt-4 font-bold py-2 px-4 rounded-full shadow transition duration-300 ease-in-out" style="background-color: var(--border-color); color: var(--text-secondary);">
                     Clear All Sessions
                 </button>
             </div>
         </div>
 
+        <!-- Daily Focus Container (New Position) -->
+        <div id="daily-focus-container" class="mt-8 p-6 rounded-xl shadow-lg w-full max-w-6xl text-center" style="background-color: var(--bg-secondary);">
+            <h3 class="text-xl font-semibold text-gray-100 mb-3">Daily Inspiration ?</h3>
+            <p id="daily-focus-text" class="text-gray-300 italic mb-4">Click "Get New Tip" for a fresh dose of motivation or a quick study hack!</p>
+            <button id="get-daily-focus-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-5 rounded-full shadow transition duration-300 ease-in-out">
+                Get New Quote
+            </button>
+        </div>
+
+
         <!-- Notepad Section (Tab Content) -->
-        <div id="notepad-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">My Notepad</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-xl font-semibold mb-3 text-gray-100">Checklist</h3>
+        <div id="notepad-section" class="w-full max-w-6xl rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content" style="background-color: var(--bg-secondary);">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">My Notepad ??</h2>
+            <div class="grid grid-cols-1 gap-6"> <!-- Changed to single column grid -->
+
+                <!-- Checklist Box -->
+                <div class="box-container checklist-box">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex items-center">Checklist ?</h3>
                     <div class="flex mb-4 gap-2">
                         <input type="text" id="new-checklist-item-input" placeholder="Add new checklist item"
-                               class="flex-grow p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                               class="flex-grow p-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <button id="add-checklist-item-btn"
                                 class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out">
                             Add Item
                         </button>
                     </div>
-                    <div id="checklist-items-container" class="space-y-2 max-h-72 overflow-y-auto scrollbar-hide">
+                    <div id="checklist-items-container" class="flex-grow space-y-2 custom-scrollbar p-2" style="max-height: 250px;">
                         <!-- Checklist items will be rendered here -->
                     </div>
                 </div>
-                <div>
-                    <h3 class="text-xl font-semibold mb-3 text-gray-100">My Notes</h3>
+
+                <!-- Quick Notes Box -->
+                <div class="box-container notes-box">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex items-center">Quick Notes ??</h3>
                     <div class="flex flex-col gap-3 mb-4">
                         <input type="text" id="new-note-title-input" placeholder="Note Title"
-                               class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                               class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <textarea id="new-note-content-input" placeholder="Note Content"
-                                  class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"></textarea>
+                                  class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"></textarea>
                         <button id="add-note-btn"
                                 class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out">
                             Add Note
                         </button>
                     </div>
-                    <div id="notes-list-container" class="space-y-2 max-h-72 overflow-y-auto scrollbar-hide">
+                    <div id="notes-list-container" class="flex-grow space-y-2 custom-scrollbar p-2" style="max-height: 250px;">
                         <!-- Individual notes will be rendered here -->
                         <p class="text-gray-400 text-center text-sm">No notes added yet.</p>
                     </div>
                 </div>
+
+                <!-- Goals & Planning Section (Moved up) -->
+                <div class="box-container goals-box">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex items-center">My Study Goals & Planning ??</h3>
+                    <div class="mb-6">
+                        <div class="flex flex-col gap-4 mb-4">
+                            <input type="text" id="new-goal-name-input" placeholder="Goal Name (e.g., Finish Chapter 3)"
+                                   class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                            <textarea id="new-goal-description-input" placeholder="Description (optional, e.g., Read pages 50-75 and do exercises)"
+                                      class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full min-h-[60px]"></textarea>
+                            <div class="flex flex-col md:flex-row gap-4 w-full">
+                                <select id="new-goal-priority-input"
+                                        class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow">
+                                    <option value="Low">Low Priority</option>
+                                    <option value="Medium" selected>Medium Priority</option>
+                                    <option value="High">High Priority</option>
+                                </select>
+                                <input type="date" id="new-goal-due-date-input"
+                                       class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow">
+                                <button id="add-goal-btn"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out">
+                                    Add Goal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="goals-container" class="space-y-3 custom-scrollbar p-2" style="max-height: 250px;">
+                        <!-- Goals will be rendered here -->
+                        <p class="text-gray-400 text-center text-sm">No goals added yet.</p>
+                    </div>
+                </div>
+
+                <!-- Resources Section -->
+                <div class="box-container resources-box">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex items-center">My Resources & Links ??</h3>
+                    <div class="mb-6">
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <input type="text" id="new-resource-title-input" placeholder="Resource Title"
+                                   class="flex-grow p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="url" id="new-resource-url-input" placeholder="Resource URL (e.g., https://example.com)"
+                                   class="flex-grow p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button id="add-resource-btn"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out">
+                                Add Resource
+                            </button>
+                        </div>
+                    </div>
+                    <div id="resources-container" class="space-y-3 custom-scrollbar p-2" style="max-height: 250px;">
+                        <!-- Resources will be rendered here -->
+                        <p class="text-gray-400 text-center text-sm">No resources added yet.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- Statistics Section (Top-Level Tab Content, now a placeholder as main stats moved) -->
-        <div id="stats-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Advanced Study Statistics & Reports</h2>
-            <div class="text-center text-gray-300">
-                <p>This tab is reserved for more advanced analytics.</p>
-                <p class="mt-2">Coming soon: Detailed graphs, custom reports, and long-term trends!</p>
+        <!-- Shop Section (New Tab Content) -->
+        <div id="shop-section" class="w-full max-w-6xl rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content" style="background-color: var(--bg-secondary);">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">The StudyFlow Shop ???</h2>
+            <p class="text-gray-300 text-center mb-6">Level up your study environment! Purchase new visual themes for your tracker.</p>
+
+            <div id="shop-skins-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 custom-scrollbar p-2 max-h-[600px]">
+                <!-- Skins will be rendered here by JavaScript -->
+                <p class="text-gray-400 text-center text-sm col-span-full">Shop loading...</p>
             </div>
         </div>
 
-        <!-- Goals & Planning Section (Tab Content) -->
-        <div id="goals-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Goals & Planning</h2>
-            <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3 text-gray-100">Add New Goal</h3>
-                <div class="flex flex-col gap-4 mb-4">
-                    <input type="text" id="new-goal-name-input" placeholder="Goal Name (e.g., Finish Chapter 3)"
-                           class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
-                    <textarea id="new-goal-description-input" placeholder="Description (optional, e.g., Read pages 50-75 and do exercises)"
-                              class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full min-h-[60px]"></textarea>
-                    <div class="flex flex-col md:flex-row gap-4 w-full">
-                        <select id="new-goal-priority-input"
-                                class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow">
-                            <option value="Low">Low Priority</option>
-                            <option value="Medium" selected>Medium Priority</option>
-                            <option value="High">High Priority</option>
+        <!-- Capitalist Game Section (NEW TAB) -->
+        <div id="capitalist-section" class="w-full max-w-6xl rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content" style="background-color: var(--bg-secondary);">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">StudyFlow Capitalist ??</h2>
+            <p class="text-gray-300 text-center mb-6">Invest your hard-earned cash to generate more money over time. The higher your level, the more lucrative (and risky!) your options become.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Make Investment Card -->
+                <div class="investment-card p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-100">Make an Investment</h3>
+                    <div class="mb-4">
+                        <label for="investment-amount-input" class="block text-sm font-medium mb-1 text-gray-300">Amount to Invest ($)</label>
+                        <input type="number" id="investment-amount-input" min="10" value="100"
+                               class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-500 w-full">
+                    </div>
+                    <div class="mb-4">
+                        <label for="investment-type-select" class="block text-sm font-medium mb-1 text-gray-300">Investment Type</label>
+                        <select id="investment-type-select" class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                            <option value="bond">Study Bond</option>
+                            <option value="venture">Study Venture</option>
                         </select>
-                        <input type="date" id="new-goal-due-date-input"
-                               class="p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow">
-                        <button id="add-goal-btn"
-                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out">
-                            Add Goal
-                        </button>
+                    </div>
+                    <div class="mb-4">
+                        <label for="investment-duration-select" class="block text-sm font-medium mb-1 text-gray-300">Duration</label>
+                        <select id="investment-duration-select" class="p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                            <option value="3600000">1 Hour</option>
+                            <option value="21600000">6 Hours</option>
+                            <option value="86400000">24 Hours</option>
+                        </select>
+                    </div>
+                    <button id="invest-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out w-full">
+                        Invest!
+                    </button>
+                </div>
+
+                <!-- Active Investments Display -->
+                <div class="investment-card p-6 rounded-xl shadow-lg flex flex-col">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-100">Your Active Investments</h3>
+                    <div id="investment-list-container" class="flex-grow custom-scrollbar space-y-4 p-2 max-h-96">
+                        <p class="text-gray-400 text-center text-sm">No active investments.</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div>
-                <h3 class="text-xl font-semibold mb-3 text-gray-100">My Study Goals</h3>
-                <div id="goals-container" class="space-y-3 max-h-96 overflow-y-auto scrollbar-hide p-2">
-                    <!-- Goals will be rendered here -->
-                    <p class="text-gray-400 text-center text-sm">No goals added yet.</p>
+
+        <!-- About Section (Tab Content) -->
+        <div id="about-section" class="w-full max-w-6xl rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content" style="background-color: var(--bg-secondary);">
+            <h2 class="text-3xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 text-center drop-shadow-lg">
+                Unlock Your Potential with StudyFlow ??
+            </h2>
+            <div class="text-center text-gray-200 leading-relaxed text-lg">
+                <p class="mb-6 animate-fade-in">
+                    Welcome to <strong>StudyFlow</strong>, your dedicated digital partner crafted to revolutionize how you study and manage your time. We believe that effective learning shouldn't be a struggle, but a fluid, engaging journey. That's why we've built an intuitive platform to empower students and lifelong learners alike!
+                </p>
+                <h3 class="text-2xl font-bold text-green-400 mb-4 animate-slide-up">Why Choose StudyFlow?</h3>
+                <ul class="list-disc list-inside text-left mx-auto max-w-md mt-2 space-y-3 text-gray-300">
+                    <li class="flex items-start mb-2">
+                        <span class="text-xl mr-3">?</span>
+                        <div><strong>Effortless Organization:</strong> Consolidate your study sessions, set ambitious goals, and curate essential resources – all within a single, streamlined workspace.</div>
+                    </li>
+                    <li class="flex items-start mb-2">
+                        <span class="text-xl mr-3">??</span>
+                        <div><strong>Boost Your Focus Power:</strong> Harness the renowned Pomodoro Technique to slice your study time into focused, manageable sprints, amplifying concentration and banishing burnout.</div>
+                    </li>
+                    <li class="flex items-start mb-2">
+                        <span class="text-xl mr-3">??</span>
+                        <div><strong>Track Your Triumphs:</strong> Visualize your daily and cumulative study hours to uncover valuable insights into your habits, celebrate every milestone, and watch your progress soar!</div>
+                    </li>
+                    <li class="flex items-start mb-2">
+                        <span class="text-xl mr-3">??</span>
+                        <div><strong>Conquer Procrastination:</strong> With clear objectives and real-time tracking, you'll feel an undeniable surge of motivation, turning procrastination into consistent, rewarding progress.</div>
+                    </li>
+                </ul>
+                <p class="font-bold text-white mt-8 text-xl animate-fade-in-slow">
+                    <span class="text-red-400">Your Privacy, Our Promise:</span> A Fortress of Security ??
+                    <br>At StudyFlow, your digital safety is not just a feature – it's our foundational principle. We operate with unwavering transparency and profound respect for your personal information. Every byte of data you generate within this application – from your study logs to your most private notes, goals, and resources – is stored <strong class="text-yellow-300">exclusively within your browser's local storage</strong>. This means:
+                </p>
+                <ul class="list-disc list-inside text-left mx-auto max-w-md mt-4 space-y-2 text-gray-300">
+                    <li class="flex items-start"><span class="text-red-400 text-lg mr-2">?</span> We absolutely do <strong class="text-white">NOT</strong> collect any personal data.</li>
+                    <li class="flex items-start"><span class="text-red-400 text-lg mr-2">?</span> Your valuable information is <strong class="text-white">NEVER</strong> stored on our servers.</li>
+                    <li class="flex items-start"><span class="text-red-400 text-lg mr-2">?</span> We are committed to a strict <strong class="text-white">NO</strong> data scraping policy.</li>
+                </ul>
+                <p class="mt-8 text-xl font-semibold text-purple-300 animate-bounce-in">
+                    Embark on a secure, efficient, and truly empowering study experience! Join the StudyFlow revolution today! ??
+                </p>
+            </div>
+
+            <!-- Coming Soon Section -->
+            <div class="coming-soon-content text-left text-gray-200 leading-relaxed text-lg space-y-6 mt-12 pt-8 border-t" style="border-color: var(--border-color);">
+                <h2 class="text-3xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-500 text-center drop-shadow-lg">
+                    The Future of StudyFlow is Brighter Than Ever! ??
+                </h2>
+                <p class="mb-6">We're relentlessly innovating to bring you a more powerful and personalized StudyFlow experience. Get ready for these groundbreaking enhancements hitting your browser soon:</p>
+
+                <div class="flex items-start mb-4">
+                    <span class="text-3xl mr-4 text-blue-400">??</span>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-blue-400"><strong>Advanced Analytics & Visual Mastery</strong></h3>
+                        <ul class="list-disc list-inside ml-4 space-y-1 text-gray-300">
+                            <li><strong>Interactive Performance Charts:</strong> Dive deep into your study patterns with dynamic graphs illustrating your progress across days, weeks, and months. Pinpoint your peak productivity and areas for growth!</li>
+                            <li><strong>Comprehensive Productivity Reports:</strong> Receive insightful summaries of your study sessions, track your goal completion rates, and analyze your average focus durations to fine-tune your learning strategy.</li>
+                        </ul>
+                    </div>
                 </div>
+
+                <div class="flex items-start mb-4">
+                    <span class="text-3xl mr-4 text-purple-400">??</span>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-purple-400"><strong>Intelligent Notifications & Gentle Nudges</strong></h3>
+                        <ul class="list-disc list-inside ml-4 space-y-1 text-gray-300">
+                            <li><strong>Goal Guardian Reminders:</strong> Get timely, smart notifications if you're drifting away from your daily study targets, keeping you on track effortlessly.</li>
+                            <li><strong>Mindful Break Prompts:</strong> Receive gentle nudges to step away and recharge during marathon study sessions, ensuring sustainable productivity.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex items-start mb-4">
+                    <span class="text-3xl mr-4 text-yellow-400">??</span>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-yellow-400"><strong>Unleash Your Style: Themes & Personalization</strong></h3>
+                        <ul class="list-disc list-inside ml-4 space-y-1 text-gray-300">
+                            <li><strong>Radiant Light Mode:</strong> Toggle seamlessly between our classic dark theme and a brand-new, vibrant light mode designed for ultimate visual comfort.</li>
+                            <li><strong>Custom Color Palettes:</strong> Express yourself! Choose from an expansive spectrum of color schemes to tailor the StudyFlow interface to your unique aesthetic.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex items-start mb-4">
+                    <span class="text-3xl mr-4 text-red-400">??</span>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-red-400"><strong>Master Your Data: Advanced Management Tools</strong></h3>
+                        <ul class="list-disc list-inside ml-4 space-y-1 text-gray-300">
+                            <li><strong>Effortless Data Backup:</strong> Securely export all your study sessions, notes, goals, and resources as a portable JSON file. Your data is truly yours!</li>
+                            <li><strong>Seamless Data Import:</strong> Restore your entire StudyFlow universe in seconds by importing your previously exported JSON files.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex items-start mb-4">
+                    <span class="text-3xl mr-4 text-teal-400">??</span>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2 text-teal-400"><strong>Ignite Your Journey: Engaging Gamification</strong></h3>
+                        <ul class="list-disc list-inside ml-4 space-y-1 text-gray-300">
+                            <li><strong>Achievements & Exclusive Badges:</strong> Earn dazzling virtual rewards as you crush study milestones and maintain unwavering consistency.</li>
+                            <li><strong>Epic Study Streaks:</strong> Build and track your consecutive study days, transforming your routine into a thrilling quest for knowledge and self-improvement!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="text-center font-extrabold text-white mt-10 text-xl animate-pulse">
+                    The future of focused learning is here. Stay tuned for these transformative updates and many more, empowering you to master your study routine like never before! ??????
+                </p>
+            </div>
+
+            <!-- Sponsor Section (Redesigned with Red, Black, White) -->
+            <div class="sponsor-content text-gray-300 leading-relaxed text-lg flex flex-col items-center mt-12 pt-8 border-t" style="border-color: var(--border-color);">
+                <h2 class="text-3xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-white to-red-600 text-center drop-shadow-lg">
+                    Our Valued Sponsor: A Partnership in Progress ??
+                </h2>
+                <div class="sponsor-card relative">
+                    <div class="left-side">
+                        <p class="sponsor-highlight-en text-5xl font-extrabold mb-2">
+                            Al-Taqwa Company
+                        </p>
+                        <p class="sponsor-text-en text-2xl">
+                            for Food Delivery
+                        </p>
+                    </div>
+                    <hr class="border-red-600 my-4"> <!-- Horizontal rule for mobile -->
+                    <div class="right-side">
+                        <p class="sponsor-highlight-ar text-5xl font-extrabold mb-2" dir="rtl">
+                            ???? ??????
+                        </p>
+                        <p class="sponsor-text-ar text-2xl" dir="rtl">
+                            ??????? ?????????
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-6 text-xl text-white font-semibold">
+                    We extend our deepest gratitude for their unwavering support in fueling our mission!
+                </p>
             </div>
         </div>
 
-        <!-- Resources/Links Section (Tab Content) -->
-        <div id="resources-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Resources & Links</h2>
-            <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-3 text-gray-100">Add New Resource</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-4">
-                    <input type="text" id="new-resource-title-input" placeholder="Resource Title"
-                           class="flex-grow p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="url" id="new-resource-url-input" placeholder="Resource URL (e.g., https://example.com)"
-                           class="flex-grow p-3 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button id="add-resource-btn"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out">
-                        Add Resource
+
+        <!-- AI Assistant Section (New Tab Content) -->
+        <div id="ai-assistant-section" class="w-full max-w-6xl rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content" style="background-color: var(--bg-secondary);">
+            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">AI Study Assistant ??</h2>
+            <div id="chat-window" class="w-full h-96 overflow-y-auto custom-scrollbar mb-4">
+                <div class="ai-message">
+                    <p>Hello! I'm your AI Study Assistant. I can help you with study tips, explain concepts, provide motivation, or just chat. What's on my mind today?</p>
+                </div>
+            </div>
+            <div id="loading-indicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="user-input" placeholder="Ask me anything..."
+                       class="flex-grow p-3 rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="send-chat-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out">
+                    Send
+                </button>
+            </div>
+            <!-- API Key Input for AI Assistant -->
+            <div class="mt-4 p-4 rounded-lg shadow-inner border border-red-500" style="background-color: var(--bg-tertiary);">
+                <h3 class="text-xl font-semibold mb-3 text-gray-100 flex items-center">
+                    <span class="text-red-400 text-2xl mr-2">??</span> Gemini API Key Required
+                </h3>
+                <p class="text-sm text-gray-300 mb-3">
+                    To use the AI Assistant, you **must** provide your own Gemini API key.
+                    You can generate a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline hover:text-blue-300">Google AI Studio</a>.
+                    Your key will be securely saved only in your browser's local storage.
+                </p>
+                <div class="flex gap-2">
+                    <input type="password" id="gemini-api-key-input" placeholder="Enter your Gemini API Key here..."
+                           class="flex-grow p-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button id="save-api-key-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-md transition duration-300 ease-in-out">
+                        Save API Key
                     </button>
                 </div>
-            </div>
-
-            <div>
-                <h3 class="text-xl font-semibold mb-3 text-gray-100">My Resources</h3>
-                <div id="resources-container" class="space-y-3 max-h-96 overflow-y-auto scrollbar-hide p-2">
-                    <!-- Resources will be rendered here -->
-                    <p class="text-gray-400 text-center text-sm">No resources added yet.</p>
-                </div>
+                <button id="clear-api-key-btn" class="mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out">
+                    Clear API Key
+                </button>
             </div>
         </div>
-
-        <!-- About Section (New Tab Content) -->
-        <div id="about-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">About StudyFlow</h2>
-            <div class="text-center text-gray-300 leading-relaxed text-lg">
-                <p class="mb-4">
-                    Welcome to <strong>StudyFlow</strong>, your free and intuitive online companion designed to help students and anyone seeking to boost their productivity and manage their study time effectively. Our mission is to provide a seamless and distraction-free environment to support your learning journey.
-                </p>
-                <p class="mb-4">
-                    <strong>Why StudyFlow?</strong>
-                    <ul class="list-disc list-inside text-left mx-auto max-w-md mt-2 space-y-1">
-                        <li><strong>Stay Organized:</strong> Keep track of your study sessions, set clear goals, and manage important resources all in one place.</li>
-                        <li><strong>Boost Focus:</strong> Utilize the Pomodoro Technique to break down your study into manageable intervals, improving concentration and reducing burnout.</li>
-                        <li><strong>Track Progress:</strong> Monitor your daily and overall study time to understand your habits and celebrate your achievements.</li>
-                        <li><strong>No More Procrastination:</strong> By setting clear objectives and actively tracking your time, you can overcome the urge to procrastinate and make consistent progress.</li>
-                    </ul>
-                </p>
-                <p class="font-semibold text-white mt-4">
-                    <span class="text-red-400">Your Privacy is Paramount:</span>
-                    At StudyFlow, we believe in complete transparency and respect your privacy. Everything you enter into this application – your study sessions, notes, goals, and resources – is stored <strong>exclusively within your browser's local storage</strong>. This means:
-                </p>
-                <ul class="list-disc list-inside text-left mx-auto max-w-md mt-2 space-y-1 text-gray-300">
-                    <li>We do <strong>NOT</strong> collect any personal data.</li>
-                    <li>We do <strong>NOT</strong> store any of your information on our servers.</li>
-                    <li>We do <strong>NOT</strong> engage in data scraping.</li>
-                    <li>Your data never leaves your device unless you choose to manually export it.</li>
-                </ul>
-                <p class="mt-4">
-                    Enjoy a secure and efficient study experience!
-                </p>
-            </div>
-        </div>
-
-        <!-- Coming Soon Section (New Tab Content) -->
-        <div id="coming-soon-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Coming Soon to StudyFlow!</h2>
-            <div class="text-left text-gray-300 leading-relaxed text-lg space-y-6">
-                <p>We're constantly working to improve StudyFlow and bring you even more powerful features to enhance your study experience. Here's a sneak peek at what's in the pipeline:</p>
-
-                <div>
-                    <h3 class="text-2xl font-semibold mb-3 text-blue-400">📈 <strong>Enhanced Statistics & Visualization</strong></h3>
-                    <ul class="list-disc list-inside ml-4 space-y-1">
-                        <li><strong>Interactive Charts:</strong> Visualize your study habits over days, weeks, and months with dynamic graphs to identify trends and peak productivity times.</li>
-                        <li><strong>Productivity Reports:</strong> Get detailed summaries of your study sessions, goal completion rates, and average focus durations.</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-2xl font-semibold mb-3 text-green-400">🔔 <strong>Smart Notifications & Reminders</strong></h3>
-                    <ul class="list-disc list-inside ml-4 space-y-1">
-                        <li><strong>Daily Goal Reminders:</strong> Receive timely notifications if you're falling behind on your daily study targets.</li>
-                        <li><strong>Break Reminders:</strong> Gentle nudges to take a well-deserved break during long, uninterrupted study sessions.</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-2xl font-semibold mb-3 text-purple-400">🎨 <strong>Theming and Personalization</strong></h3>
-                    <ul class="list-disc list-inside ml-4 space-y-1">
-                        <li><strong>Light Mode Toggle:</strong> Switch between the current dark theme and a new, eye-friendly light mode.</li>
-                        <li><strong>Custom Color Palettes:</strong> Personalize the look and feel of StudyFlow by choosing from a variety of color schemes.</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-2xl font-semibold mb-3 text-yellow-400">💾 <strong>Advanced Data Management</strong></h3>
-                    <ul class="list-disc list-inside ml-4 space-y-1">
-                        <li><strong>Export/Import Data:</strong> Easily back up your study sessions, notes, goals, and resources by exporting them as a JSON file, and import them back whenever needed.</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-2xl font-semibold mb-3 text-pink-400">🏆 <strong>Gamification Elements</strong></h3>
-                    <ul class="list-disc list-inside ml-4 space-y-1">
-                        <li><strong>Achievements & Badges:</strong> Earn virtual rewards for reaching study milestones and maintaining consistency.</li>
-                        <li><strong>Study Streaks:</strong> Track your consecutive study days to build motivation and healthy habits.</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="text-2xl font-semibold mb-3 text-orange-400">📝 <strong>Enhanced Note-Taking Experience</strong></h3>
-                    <ul class="list-disc list-inside ml-4 space-y-1">
-                        <li><strong>Markdown Support:</strong> Add basic formatting (bold, italics, lists) to your notes for better organization and readability.</li>
-                        <li><strong>Search Notes:</strong> Quickly find specific notes using a dedicated search bar.</li>
-                    </ul>
-                </div>
-
-                <p class="text-center font-semibold mt-8">Stay tuned for these updates and more to help you master your study routine!</p>
-            </div>
-        </div>
-
-        <!-- Sponsor Section (New Tab Content) -->
-        <div id="sponsor-section" class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-xl p-6 mt-8 mb-8 hidden tab-content">
-            <h2 class="text-3xl font-bold mb-6 text-gray-100 text-center">Our Sponsor</h2>
-            <div class="text-center text-gray-300 leading-relaxed text-lg flex flex-col items-center">
-                <p class="mb-4 text-xl font-bold text-gray-100">
-                    Proudly Sponsored By:
-                </p>
-                <div class="p-6 bg-gray-700 rounded-lg shadow-xl inline-block max-w-sm sponsor-logo">
-                    <p class="text-green-400 text-5xl font-extrabold mb-2" dir="rtl">
-                        شركة التقوى
-                    </p>
-                    <p class="text-gray-400 text-2xl" dir="rtl">
-                        لِتوصيل المأكولات
-                    </p>
-                    <hr class="border-gray-500 my-4">
-                    <p class="text-green-400 text-3xl font-bold">
-                        Al-Taqwa Company
-                    </p>
-                    <p class="text-gray-400 text-xl">
-                        for Food Delivery
-                    </p>
-                </div>
-                <p class="mt-6 text-xl">
-                    Thank you for supporting our mission!
-                </p>
-            </div>
-        </div>
-
     </div>
 
 
@@ -737,12 +1185,12 @@
             <div class="mb-4">
                 <label for="edit-session-name" class="block text-sm font-medium mb-1 text-gray-300">Session Name</label>
                 <input type="text" id="edit-session-name"
-                       class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="p-2 rounded-md border w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="mb-4">
                 <label for="edit-duration" class="block text-sm font-medium mb-1 text-gray-300">Duration (minutes)</label>
                 <input type="number" id="edit-duration"
-                       class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="p-2 rounded-md border w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex justify-end space-x-3">
                 <button id="cancel-edit-btn" class="bg-gray-600 hover:bg-gray-500 text-gray-200 font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out">
@@ -765,16 +1213,16 @@
             </p>
             <div class="mb-4 flex items-center gap-2">
                 <label for="wake-up-hour-input" class="block text-sm font-medium text-gray-300">Wake-up Time:</label>
-                <select id="wake-up-hour-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20"></select>
-                <select id="wake-up-ampm-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20">
+                <select id="wake-up-hour-input" class="p-2 rounded-md border w-20"></select>
+                <select id="wake-up-ampm-input" class="p-2 rounded-md border w-20">
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
                 </select>
             </div>
             <div class="mb-4 flex items-center gap-2">
                 <label for="bed-hour-input" class="block text-sm font-medium text-gray-300">Bedtime:</label>
-                <select id="bed-hour-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20"></select>
-                <select id="bed-ampm-input" class="p-2 rounded-md border border-gray-600 bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-20">
+                <select id="bed-hour-input" class="p-2 rounded-md border w-20"></select>
+                <select id="bed-ampm-input" class="p-2 rounded-md border w-20">
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
                 </select>
@@ -832,57 +1280,59 @@
         const savePomodoroSettingsBtn = document.getElementById('save-pomodoro-settings-btn'); // New button
         const togglePomodoroSettingsBtn = document.getElementById('toggle-pomodoro-settings-btn'); // New button for settings toggle
         const pomodoroSettings = document.getElementById('pomodoro-settings'); // Settings div
-        const ambientSoundToggle = document.getElementById('ambient-sound-toggle'); // New checkbox
+
+        // Ambient Sound Mixer (Updated)
+        const ambientSoundSelector = document.getElementById('ambient-sound-selector');
+        const ambientVolumeSlider = document.getElementById('ambient-volume-slider');
 
 
         // Navigation and Tab elements (top-level)
         const navStudyTracker = document.getElementById('nav-study-tracker');
         const navNotepad = document.getElementById('nav-notepad');
-        const navGoals = document.getElementById('nav-goals');
-        const navResources = document.getElementById('nav-resources');
-        const navAbout = document.getElementById('nav-about'); // New
-        const navComingSoon = document.getElementById('nav-coming-soon'); // New
-        const navSponsor = document.getElementById('nav-sponsor'); // New Sponsor tab
+        const navShop = document.getElementById('nav-shop'); // NEW
+        const navCapitalist = document.getElementById('nav-capitalist'); // NEW
+        const navAbout = document.getElementById('nav-about');
+        const navAIAssistant = document.getElementById('nav-ai-assistant');
 
         const notepadSection = document.getElementById('notepad-section');
         const mainTrackerSection = document.getElementById('main-tracker-section');
-        const statsSection = document.getElementById('stats-section'); // This is now for advanced stats, not basic ones.
-        const goalsSection = document.getElementById('goals-section');
-        const resourcesSection = document.getElementById('resources-section');
-        const aboutSection = document.getElementById('about-section'); // New
-        const comingSoonSection = document.getElementById('coming-soon-section'); // New
-        const sponsorSection = document.getElementById('sponsor-section'); // New Sponsor section
+        const shopSection = document.getElementById('shop-section'); // NEW
+        const capitalistSection = document.getElementById('capitalist-section'); // NEW
+        const aboutSection = document.getElementById('about-section');
+        const aiAssistantSection = document.getElementById('ai-assistant-section');
 
-        // XP Bar Elements
-        const xpBarContainer = document.getElementById('xp-bar-container');
+
+        // XP Bar Elements (Updated to include wrapper)
+        const xpCashWrapper = document.getElementById('xp-cash-wrapper'); // New wrapper element
+        const levelDisplay = document.getElementById('level-display'); // New element for level
+        const xpBarOuter = document.getElementById('xp-bar-outer'); // Renamed from xp-bar-container
         const xpBarFill = document.getElementById('xp-bar-fill');
         const xpInfo = document.getElementById('xp-info');
+        const cashDisplay = document.getElementById('cash-display'); // New element for cash
 
 
         // Notepad elements
         const newChecklistItemInput = document.getElementById('new-checklist-item-input');
         const addChecklistItemBtn = document.getElementById('add-checklist-item-btn');
         const checklistItemsContainer = document.getElementById('checklist-items-container');
-        // Removed notesTextarea, now individual notes
-        const newNoteTitleInput = document.getElementById('new-note-title-input'); // New
-        const newNoteContentInput = document.getElementById('new-note-content-input'); // New
-        const addNoteBtn = document.getElementById('add-note-btn'); // New
-        const notesListContainer = document.getElementById('notes-list-container'); // New
+        const newNoteTitleInput = document.getElementById('new-note-title-input');
+        const newNoteContentInput = document.getElementById('new-note-content-input');
+        const addNoteBtn = document.getElementById('add-note-btn');
+        const notesListContainer = document.getElementById('notes-list-container');
 
-
-        // Goals elements
-        const newGoalNameInput = document.getElementById('new-goal-name-input');
-        const newGoalDescriptionInput = document.getElementById('new-goal-description-input'); // New
-        const newGoalPriorityInput = document.getElementById('new-goal-priority-input'); // New
-        const newGoalDueDateInput = document.getElementById('new-goal-due-date-input');
-        const addGoalBtn = document.getElementById('add-goal-btn');
-        const goalsContainer = document.getElementById('goals-container');
-
-        // Resources elements
+        // Notepad's moved Resources elements
         const newResourceTitleInput = document.getElementById('new-resource-title-input');
         const newResourceUrlInput = document.getElementById('new-resource-url-input');
         const addResourceBtn = document.getElementById('add-resource-btn');
         const resourcesContainer = document.getElementById('resources-container');
+
+        // Notepad's moved Goals elements
+        const newGoalNameInput = document.getElementById('new-goal-name-input');
+        const newGoalDescriptionInput = document.getElementById('new-goal-description-input');
+        const newGoalPriorityInput = document.getElementById('new-goal-priority-input');
+        const newGoalDueDateInput = document.getElementById('new-goal-due-date-input');
+        const addGoalBtn = document.getElementById('add-goal-btn');
+        const goalsContainer = document.getElementById('goals-container');
 
 
         // Edit Session Modal Elements
@@ -893,7 +1343,7 @@
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
         const saveEditBtn = document.getElementById('save-edit-btn');
 
-        // Goal Setting Modal Elements
+        // Goal Modal Elements
         const goalModalOverlay = document.getElementById('goal-modal-overlay');
         const goalModalCloseBtn = document.getElementById('goal-modal-close-btn');
         const wakeUpHourInput = document.getElementById('wake-up-hour-input');
@@ -910,6 +1360,32 @@
         const customModalMessage = document.getElementById('custom-modal-message');
         const customModalCancelBtn = document.getElementById('custom-modal-cancel-btn');
         const customModalConfirmBtn = document.getElementById('custom-modal-confirm-btn');
+
+        // AI Assistant Elements
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const sendChatBtn = document.getElementById('send-chat-btn');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const geminiApiKeyInput = document.getElementById('gemini-api-key-input');
+        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+        const clearApiKeyBtn = document.getElementById('clear-api-key-btn');
+
+
+        // Daily Focus Elements
+        const dailyFocusContainer = document.getElementById('daily-focus-container');
+        const dailyFocusText = document.getElementById('daily-focus-text');
+        const getDailyFocusBtn = document.getElementById('get-daily-focus-btn');
+
+        // Shop Elements (NEW)
+        const shopSkinsContainer = document.getElementById('shop-skins-container');
+
+        // Capitalist Game Elements (NEW)
+        const investmentAmountInput = document.getElementById('investment-amount-input');
+        const investmentTypeSelect = document.getElementById('investment-type-select');
+        const investmentDurationSelect = document.getElementById('investment-duration-select');
+        const investBtn = document.getElementById('invest-btn');
+        const investmentListContainer = document.getElementById('investment-list-container');
+
 
         // Stopwatch Variables
         let startTime = 0;
@@ -933,9 +1409,16 @@
 
         // Audio for notifications
         const notificationSound = new Audio('https://www.soundjay.com/buttons/beep-07.mp3'); // A simple beep sound
-        const ambientSound = new Audio('https://www.soundjay.com/misc/sounds/water-01.mp3'); // Example ambient sound
-        ambientSound.loop = true;
-        ambientSound.volume = 0.3; // Set a low default volume
+        // Ambient sound setup (Updated)
+        const ambientSoundsMap = {
+            none: null,
+            rain: 'https://www.soundjay.com/nature/sounds/rain-02.mp3',
+            cafe: 'https://www.soundjay.com/miscellaneous/sounds/cafe-01.mp3',
+            ocean: 'https://www.soundjay.com/nature/sounds/ocean-waves-01.mp3',
+            forest: 'https://www.soundjay.com/nature/sounds/forest-ambience-01.mp3'
+        };
+        let ambientAudio = new Audio();
+        ambientAudio.loop = true;
 
 
         // Current display mode for the main tracker: 'stopwatch', 'pomodoro', or 'stats'
@@ -948,9 +1431,10 @@
         let totalStudyOverallMs = 0;
         let dailyStudyGoalMs = 0;
         let checklistItems = [];
-        let studyGoals = [];
-        let studyResources = [];
         let individualNotes = []; // New array for individual notes
+        let studyResources = [];
+        let studyGoals = [];
+        let investments = []; // NEW: For StudyFlow Capitalist game
 
         // Level System Variables
         let currentXP = 0;
@@ -981,6 +1465,18 @@
             100: "Architect of Knowledge"
         };
 
+        // Cash System Variable (New)
+        let currentCash = 0;
+        const CASH_PER_MINUTE_BASE = 20; // Reverted to a less aggressive value
+        const CASH_MULTIPLIER_MIN = 1.0; // Keep random factor for study
+        const CASH_MULTIPLIER_MAX = 1.3; // Keep random factor for study
+
+        // XP System Variables
+        const XP_PER_MINUTE_BASE = 1; // Reverted to a less aggressive value (higher than previous 0.5)
+
+        // API Key for AI Assistant (Now explicitly managed by user input only)
+        let geminiApiKey = "";
+
 
         // Currently edited session ID
         let currentEditingSessionId = null;
@@ -988,6 +1484,49 @@
         // Log navigation variables
         let currentLogScrollPosition = 0;
         const logEntryHeight = 110;
+
+        // AI Chat history
+        let chatHistory = [{ role: "model", parts: [{ text: "Hello! I'm your AI Study Assistant. I can help you with study tips, explain concepts, provide motivation, or just chat. What's on my mind today?" }] }];
+
+        // Hardcoded Daily Focus Famous Quotes (20+ new ones)
+        const dailyTips = [
+            "\"The only way to do great work is to love what you do.\" – Steve Jobs",
+            "\"Believe you can and you're halfway there.\" – Theodore Roosevelt",
+            "\"The future belongs to those who believe in the beauty of their dreams.\" – Eleanor Roosevelt",
+            "\"Strive not to be a success, but rather to be of value.\" – Albert Einstein",
+            "\"The mind is everything. What you think you become.\" – Buddha",
+            "\"The best way to predict the future is to create it.\" – Peter Drucker",
+            "\"Success is not final, failure is not fatal: it is the courage to continue that counts.\" – Winston S. Churchill",
+            "\"The only limit to our realization of tomorrow will be our doubts of today.\" – Franklin D. Roosevelt",
+            "\"It always seems impossible until it's done.\" – Nelson Mandela",
+            "\"Education is the most powerful weapon which you can use to change the world.\" – Nelson Mandela",
+            "\"Learning is not attained by chance; it must be sought for with ardor and attended to with diligence.\" – Abigail Adams",
+            "\"The beautiful thing about learning is that no one can take it away from you.\" – B.B. King",
+            "\"I find that the harder I work, the more luck I seem to have.\" – Thomas Jefferson",
+            "\"Setting goals is the first step in turning the invisible into the visible.\" – Tony Robbins",
+            "\"Patience is a key element of success.\" – Bill Gates",
+            "\"You don't have to be great to start, but you have to start to be great.\" – Zig Ziglar",
+            "\"The expert in anything was once a beginner.\" – Helen Hayes",
+            "\"It does not matter how slowly you go as long as you do not stop.\" – Confucius",
+            "\"Our greatest weakness lies in giving up. The most certain way to succeed is always to try just one more time.\" – Thomas A. Edison",
+            "\"The foundation of every state is the education of its youth.\" – Diogenes Laertius",
+            "\"Study hard what interests you the most in the most undisciplined, irreverent and original manner possible.\" – Richard Feynman",
+            "\"Success is the sum of small efforts repeated day in and day out.\" – Robert Collier",
+            "\"The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.\" – Brian Herbert",
+            "\"Don't wish it were easier, wish you were better.\" – Jim Rohn"
+        ];
+        let currentTipIndex = 0;
+
+        // Skin Management
+        const skins = [
+            { id: 'default-dark', name: 'Default Dark', type: 'dark', levelRequired: 0, cost: 0, bodyClass: 'default-dark-skin', unlocked: true },
+            { id: 'default-light', name: 'Default Light', type: 'light', levelRequired: 0, cost: 0, bodyClass: 'default-light-skin', unlocked: true },
+            { id: 'forest-dream', name: 'Forest Dream', type: 'dark', levelRequired: 5, cost: 2000, bodyClass: 'forest-dream-skin', unlocked: false },
+            { id: 'ocean-breeze', name: 'Ocean Breeze', type: 'dark', levelRequired: 10, cost: 5000, bodyClass: 'ocean-breeze-skin', unlocked: false },
+            { id: 'midnight-violet', name: 'Midnight Violet', type: 'dark', levelRequired: 15, cost: 10000, bodyClass: 'midnight-violet-skin', unlocked: false }
+        ];
+        let activeSkinId = 'default-dark';
+
 
         // --- Custom Modal Functions ---
         let resolveCustomModalPromise;
@@ -1108,12 +1647,7 @@
                 awakeDurationMinutes = (24 * 60 - wakeMinutes) + bedMinutes;
             }
 
-            console.log(`Wake Time: ${wakeHour} ${wakeAmpm} (${wakeMinutes} min from midnight)`);
-            console.log(`Bed Time: ${bedHour} ${bedAmpm} (${bedMinutes} min from midnight)`);
-            console.log(`Calculated Awake Duration: ${awakeDurationMinutes} minutes`);
-
             const targetMinutes = Math.round(awakeDurationMinutes * 0.60);
-            console.log(`60% of awake time: ${targetMinutes} minutes`);
 
             return targetMinutes * 60 * 1000; // Convert to milliseconds
         }
@@ -1158,6 +1692,83 @@
         }
 
         /**
+         * Displays a floating text animation for XP/Cash gain.
+         * @param {HTMLElement} originElement - The element from which the text appears to float.
+         * @param {string} text - The text to display (e.g., "+$200", "+5 XP").
+         * @param {string} color - The CSS color for the text.
+         */
+        function showFloatingText(originElement, text, color) {
+            const rect = originElement.getBoundingClientRect();
+            const floatingDiv = document.createElement('div');
+            floatingDiv.textContent = text;
+            floatingDiv.className = 'floating-text';
+            floatingDiv.style.color = color;
+            floatingDiv.style.left = `${rect.left + rect.width / 2}px`;
+            floatingDiv.style.top = `${rect.top}px`; // Start just above the element
+            floatingDiv.style.transform = 'translateX(-50%)'; // Center horizontally
+
+            document.body.appendChild(floatingDiv);
+
+            floatingDiv.addEventListener('animationend', () => {
+                floatingDiv.remove();
+            });
+        }
+
+        /**
+         * Converts a basic Markdown-like syntax to HTML.
+         * Supports headings, bold, italic, lists, links, images, and code blocks.
+         * @param {string} text - The input text with Markdown.
+         * @returns {string} The HTML formatted text.
+         */
+        function formatTextWithMarkdown(text) {
+            let formattedText = text;
+
+            // Headings
+            formattedText = formattedText.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+            formattedText = formattedText.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+            formattedText = formattedText.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+
+            // Bold: **text**
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Italic: *text*
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+            // Links: [text](url)
+            formattedText = formattedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+            // Images: ![alt](url)
+            formattedText = formattedText.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" onerror="this.onerror=null;this.src=\'https://placehold.co/150x100/374151/E2E8F0?text=Image Error\';">');
+
+
+            // Unordered Lists: - item or * item
+            formattedText = formattedText.replace(/^\s*[-*]\s+(.*)$/gm, '<li>$1</li>');
+            formattedText = formattedText.replace(/(<li>.*<\/li>(\s*<li>.*<\/li>)*)/g, '<ul>$1</ul>');
+
+            // Ordered Lists: 1. item
+            formattedText = formattedText.replace(/^\s*\d+\.\s+(.*)$/gm, '<li>$1</li>');
+            formattedText = formattedText.replace(/(<li>.*<\/li>(\s*<li>.*<\/li>)*)/g, '<ol>$1</ol>');
+
+
+            // Code blocks: ```language\ncode\n```
+            // This is a simplified regex. A full markdown parser would be more robust.
+            formattedText = formattedText.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+            // Inline code: `code`
+            formattedText = formattedText.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // Newlines to <br> for regular text paragraphs
+            formattedText = formattedText.split('\n').map(line => {
+                // Don't add <br> within already processed block-level elements
+                if (line.trim().startsWith('<h') || line.trim().startsWith('<ul') || line.trim().startsWith('<ol') || line.trim().startsWith('<pre') || line.trim() === '') {
+                    return line;
+                }
+                return line + '<br>';
+            }).join('');
+
+
+            return formattedText;
+        }
+
+        /**
          * Saves data to localStorage.
          */
         function saveToLocalStorage() {
@@ -1170,24 +1781,35 @@
             localStorage.setItem('bedHour', bedHourInput.value);
             localStorage.setItem('bedAmpm', bedAmpmInput.value);
             localStorage.setItem('checklistItems', JSON.stringify(checklistItems));
-            localStorage.setItem('individualNotes', JSON.stringify(individualNotes)); // Save individual notes
-            localStorage.setItem('studyGoals', JSON.stringify(studyGoals));
+            localStorage.setItem('individualNotes', JSON.stringify(individualNotes));
             localStorage.setItem('studyResources', JSON.stringify(studyResources));
+            localStorage.setItem('studyGoals', JSON.stringify(studyGoals));
 
             // Save Pomodoro settings
             localStorage.setItem('pomodoroStudyTime', pomodoroStudyMinsInput.value);
             localStorage.setItem('pomodoroShortBreakTime', pomodoroShortBreakMinsInput.value);
             localStorage.setItem('pomodoroLongBreakTime', pomodoroLongBreakMinsInput.value);
-            localStorage.setItem('ambientSoundEnabled', ambientSoundToggle.checked);
+            localStorage.setItem('ambientSoundSelected', ambientSoundSelector.value);
+            localStorage.setItem('ambientVolume', ambientVolumeSlider.value);
 
             // Save Level System data
             localStorage.setItem('currentXP', currentXP);
             localStorage.setItem('currentLevel', currentLevel);
             localStorage.setItem('xpToNextLevel', xpToNextLevel);
+            localStorage.setItem('currentCash', currentCash);
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            localStorage.setItem('geminiApiKey', geminiApiKey); // Save the API key
+
+            // Save Shop data
+            localStorage.setItem('skins', JSON.stringify(skins));
+            localStorage.setItem('activeSkinId', activeSkinId);
+
+            // Save Investments data (NEW)
+            localStorage.setItem('investments', JSON.stringify(investments));
         }
 
         /**
-         * Loads data from localStorage.
+         * Loads data from localStorage. Handles data migration from old keys.
          */
         function loadFromLocalStorage() {
             const storedSessions = localStorage.getItem('studySessions');
@@ -1199,20 +1821,29 @@
             const storedBedHour = localStorage.getItem('bedHour');
             const storedBedAmpm = localStorage.getItem('bedAmpm');
             const storedChecklistItems = localStorage.getItem('checklistItems');
-            const storedIndividualNotes = localStorage.getItem('individualNotes'); // Load individual notes
-            const storedGoals = localStorage.getItem('studyGoals');
-            const storedResources = localStorage.getItem('studyResources');
+            const storedIndividualNotes = localStorage.getItem('individualNotes');
 
             // Load Pomodoro settings
             const storedPomodoroStudyTime = localStorage.getItem('pomodoroStudyTime');
             const storedPomodoroShortBreakTime = localStorage.getItem('pomodoroShortBreakTime');
             const storedPomodoroLongBreakTime = localStorage.getItem('pomodoroLongBreakTime');
-            const storedAmbientSoundEnabled = localStorage.getItem('ambientSoundEnabled');
+            const storedAmbientSoundSelected = localStorage.getItem('ambientSoundSelected');
+            const storedAmbientVolume = localStorage.getItem('ambientVolume');
 
             // Load Level System data
             const storedCurrentXP = localStorage.getItem('currentXP');
             const storedCurrentLevel = localStorage.getItem('currentLevel');
             const storedXpToNextLevel = localStorage.getItem('xpToNextLevel');
+            const storedCurrentCash = localStorage.getItem('currentCash');
+            const storedChatHistory = localStorage.getItem('chatHistory');
+            const storedGeminiApiKey = localStorage.getItem('geminiApiKey');
+
+            // Load Shop data
+            const storedSkins = localStorage.getItem('skins');
+            const storedActiveSkinId = localStorage.getItem('activeSkinId');
+
+            // Load Investments data (NEW)
+            const storedInvestments = localStorage.getItem('investments');
 
 
             if (storedSessions) {
@@ -1242,14 +1873,28 @@
             if (storedChecklistItems) {
                 checklistItems = JSON.parse(storedChecklistItems);
             }
-            if (storedIndividualNotes) { // Load individual notes
+            if (storedIndividualNotes) {
                 individualNotes = JSON.parse(storedIndividualNotes);
             }
-            if (storedGoals) {
-                studyGoals = JSON.parse(storedGoals);
-            }
+
+            // Load Resources and Goals (they are already in correct places, no specific migration needed from old code)
+            const storedResources = localStorage.getItem('studyResources');
             if (storedResources) {
-                studyResources = JSON.parse(storedResources);
+                try {
+                    studyResources = JSON.parse(storedResources);
+                } catch (e) {
+                    console.error("Error parsing resources data, resetting:", e);
+                    studyResources = [];
+                }
+            }
+            const storedGoals = localStorage.getItem('studyGoals');
+            if (storedGoals) {
+                try {
+                    studyGoals = JSON.parse(storedGoals);
+                } catch (e) {
+                    console.error("Error parsing goals data, resetting:", e);
+                    studyGoals = [];
+                }
             }
 
             // Apply loaded Pomodoro settings
@@ -1265,8 +1910,20 @@
                 pomodoroLongBreakMinsInput.value = storedPomodoroLongBreakTime;
                 pomodoroLongBreakTime = parseInt(storedPomodoroLongBreakTime, 10) * 60 * 1000;
             }
-            ambientSoundToggle.checked = (storedAmbientSoundEnabled === 'true'); // Load ambient sound state
-            toggleAmbientSound(ambientSoundToggle.checked);
+            if (storedAmbientSoundSelected) {
+                ambientSoundSelector.value = storedAmbientSoundSelected;
+            }
+            if (storedAmbientVolume) {
+                ambientAudio.volume = parseFloat(storedAmbientVolume);
+                ambientVolumeSlider.value = storedAmbientVolume;
+            } else {
+                ambientAudio.volume = 0.3; // Default volume
+                ambientVolumeSlider.value = 0.3;
+            }
+            // Set initial src for ambientAudio based on loaded selection
+            ambientAudio.src = ambientSoundsMap[ambientSoundSelector.value] || '';
+            ambientAudio.load();
+
 
             // Apply loaded Level System data
             if (storedCurrentXP) {
@@ -1275,11 +1932,44 @@
             if (storedCurrentLevel) {
                 currentLevel = parseInt(storedCurrentLevel, 10);
             }
-            // Only update xpToNextLevel from storage if it exists, otherwise calculate
             if (storedXpToNextLevel) {
                 xpToNextLevel = parseInt(storedXpToNextLevel, 10);
             } else {
-                xpToNextLevel = calculateXPForNextLevel(currentLevel); // Calculate for the current level if not stored
+                xpToNextLevel = calculateXPForNextLevel(currentLevel);
+            }
+            if (storedCurrentCash) {
+                currentCash = parseInt(storedCurrentCash, 10);
+            }
+            if (storedChatHistory) {
+                chatHistory = JSON.parse(storedChatHistory);
+            }
+            // API key is now strictly from input field, not loaded from localStorage by default
+            geminiApiKey = storedGeminiApiKey || ""; // Load if exists, but init value is ""
+            geminiApiKeyInput.value = geminiApiKey; // Display loaded key, if any
+
+
+            // Load and merge skins data (Handles new skins and their unlocked status)
+            if (storedSkins) {
+                const loadedSkins = JSON.parse(storedSkins);
+                skins.forEach(defaultSkin => {
+                    const loaded = loadedSkins.find(s => s.id === defaultSkin.id);
+                    if (loaded) {
+                        defaultSkin.unlocked = loaded.unlocked;
+                        // Ensure other properties like levelRequired, cost, bodyClass are from default to prevent tampering
+                    }
+                });
+            }
+
+            if (storedActiveSkinId) {
+                activeSkinId = storedActiveSkinId;
+                applySkin(activeSkinId, false); // Apply without saving again, to avoid loop
+            } else {
+                applySkin('default-dark', false); // Ensure default-dark is applied if nothing found
+            }
+
+            // Load Investments data (NEW)
+            if (storedInvestments) {
+                investments = JSON.parse(storedInvestments);
             }
 
 
@@ -1295,10 +1985,14 @@
             renderStats();
             renderLog();
             renderChecklist();
-            renderGoals();
-            renderResources();
-            renderIndividualNotes(); // Render individual notes on load
-            updateXPBar(); // Update XP bar on load
+            renderIndividualNotes();
+            renderResources(); // Render resources inside notepad
+            renderGoals(); // Render goals inside notepad
+            updateXPBar();
+            renderCash();
+            renderChatHistory();
+            renderShop(); // Render shop on load
+            renderInvestments(); // NEW: Render investments on load
         }
 
         /**
@@ -1402,11 +2096,13 @@
                 studySessions = [];
                 recalculateStats();
                 renderLog();
-                // Reset XP and level on clearing all sessions
+                // Reset XP, level, and cash on clearing all sessions
                 currentXP = 0;
                 currentLevel = 1;
                 xpToNextLevel = calculateXPForNextLevel(currentLevel);
+                currentCash = 0;
                 updateXPBar();
+                renderCash();
                 saveToLocalStorage();
             }
         }
@@ -1426,9 +2122,15 @@
                 if (index !== -1) {
                     const session = studySessions[index];
                     // Deduct XP if session is deleted
-                    const xpDeducted = Math.floor(session.durationMs / (1000 * 60)); // 1 XP per minute
+                    const xpDeducted = Math.floor(session.durationMs / (1000 * 60)) * XP_PER_MINUTE_BASE;
                     currentXP = Math.max(0, currentXP - xpDeducted);
                     updateLevel(); // Recalculate level after XP change
+
+                    // Deduct cash if session is deleted
+                    // Note: Cash deduction here is based on base rate, not original random multiplier for simplicity on deletion
+                    const cashDeducted = Math.floor(session.durationMs / (1000 * 60)) * CASH_PER_MINUTE_BASE;
+                    currentCash = Math.max(0, currentCash - cashDeducted);
+                    renderCash();
 
                     studySessions.splice(index, 1);
                     recalculateStats();
@@ -1482,11 +2184,18 @@
                 studySessions[sessionIndex].durationMs = newDurationMs;
 
                 // Adjust XP based on duration change
-                const oldXP = Math.floor(oldDurationMs / (1000 * 60));
-                const newXP = Math.floor(newDurationMs / (1000 * 60));
+                const oldXP = Math.floor(oldDurationMs / (1000 * 60)) * XP_PER_MINUTE_BASE;
+                const newXP = Math.floor(newDurationMs / (1000 * 60)) * XP_PER_MINUTE_BASE;
                 currentXP += (newXP - oldXP);
                 currentXP = Math.max(0, currentXP); // Ensure XP doesn't go below zero
                 updateLevel(); // Recalculate level after XP change
+
+                // Adjust cash based on duration change
+                const oldCash = Math.floor(oldDurationMs / (1000 * 60)) * CASH_PER_MINUTE_BASE; // Base rate
+                const newCash = Math.floor(newDurationMs / (1000 * 60)) * CASH_PER_MINUTE_BASE; // Base rate
+                currentCash += (newCash - oldCash);
+                currentCash = Math.max(0, currentCash);
+                renderCash();
 
                 recalculateStats();
                 renderLog();
@@ -1535,7 +2244,7 @@
          */
         async function saveGoalTimes() {
             const wakeHour = wakeUpHourInput.value;
-            const wakeAmpm = wakeAmpmInput.value;
+            const wakeAmpm = wakeUpAmpmInput.value;
             const bedHour = bedHourInput.value;
             const bedAmpm = bedAmpmInput.value;
 
@@ -1629,10 +2338,23 @@
             };
             studySessions.push(newSession);
 
-            // Grant XP for the session duration (1 XP per minute)
-            const xpGained = Math.floor(sessionDurationMs / (1000 * 60));
+            // Grant XP for the session duration (0.5 XP per minute)
+            const xpGained = Math.floor(sessionDurationMs / (1000 * 60)) * XP_PER_MINUTE_BASE;
             currentXP += xpGained;
             updateLevel(); // Check for level up
+            if (xpGained > 0) {
+                showFloatingText(xpInfo, `+${Math.floor(xpGained)} XP`, getComputedStyle(document.documentElement).getPropertyValue('--xp-fill-color'));
+            }
+
+            // Grant cash for the session duration with random multiplier
+            const cashMultiplier = Math.random() * (CASH_MULTIPLIER_MAX - CASH_MULTIPLIER_MIN) + CASH_MULTIPLIER_MIN;
+            const cashGained = Math.floor(Math.floor(sessionDurationMs / (1000 * 60)) * CASH_PER_MINUTE_BASE * cashMultiplier);
+            currentCash += cashGained;
+            renderCash();
+            if (cashGained > 0) {
+                showFloatingText(cashDisplay, `+$${cashGained}`, getComputedStyle(document.documentElement).getPropertyValue('--accent-green'));
+            }
+
 
             totalStudyOverallMs += sessionDurationMs;
             totalStudyTodayMs += sessionDurationMs;
@@ -1660,13 +2382,13 @@
 
             if (pomodoroPhase === 'study') {
                 phaseText = 'Study Time';
-                timerColor = '#48bb78'; /* Green */
+                timerColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-green');
             } else if (pomodoroPhase === 'shortBreak') {
                 phaseText = 'Short Break';
-                timerColor = '#f6e05e'; /* Yellow */
+                timerColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-yellow');
             } else if (pomodoroPhase === 'longBreak') {
                 phaseText = 'Long Break';
-                timerColor = '#fc8181'; /* Red */
+                timerColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-red');
             }
             pomodoroPhaseDisplay.textContent = phaseText;
             pomodoroTimerDisplay.style.color = timerColor;
@@ -1689,10 +2411,8 @@
         function startPomodoroTimer() {
             if (pomodoroIsRunning) return;
 
-            // Attempt to play ambient sound only if enabled and not already playing
-            if (ambientSoundToggle.checked && ambientSound.paused) {
-                ambientSound.play().catch(e => console.error("Error playing ambient sound:", e));
-            }
+            // Attempt to play ambient sound only if selected and not already playing
+            updateAmbientSound(); // This will play/pause based on selection and timer state
 
             pomodoroIsRunning = true;
             pomodoroSessionStartTime = Date.now() - (pomodoroCurrentTime); // Record start time for logging
@@ -1707,7 +2427,7 @@
                         triggerConfetti(pomodoroTimerDisplay); // Confetti on study session end
                     }
                     pomodoroIsRunning = false; // Stop the timer
-                    ambientSound.pause(); // Pause ambient sound when timer ends naturally
+                    ambientAudio.pause(); // Pause ambient sound when timer ends naturally
 
                     // Move to next phase state, but DO NOT start it automatically
                     advancePomodoroPhaseState();
@@ -1728,7 +2448,7 @@
 
             pomodoroIsRunning = false;
             clearInterval(pomodoroTimerId);
-            ambientSound.pause(); // Pause ambient sound when timer is paused
+            ambientAudio.pause(); // Pause ambient sound when timer is paused
             updatePomodoroDisplay();
         }
 
@@ -1740,7 +2460,7 @@
             pomodoroCurrentTime = pomodoroStudyTime;
             pomodoroPhase = 'study';
             pomodoroCycleCount = 0;
-            ambientSound.pause(); // Ensure ambient sound is off on reset
+            ambientAudio.pause(); // Ensure ambient sound is off on reset
             updatePomodoroDisplay();
         }
 
@@ -1749,7 +2469,7 @@
          */
         function skipPomodoroPhase() {
             pausePomodoroTimer(); // Ensure timer is paused
-            ambientSound.pause(); // Ensure ambient sound is off on skip
+            ambientAudio.pause(); // Ensure ambient sound is off on skip
             // If currently studying and time has elapsed, log the completed portion
             if (pomodoroPhase === 'study' && pomodoroCurrentTime < pomodoroStudyTime) {
                  logPomodoroSession(pomodoroStudyTime - pomodoroCurrentTime);
@@ -1797,10 +2517,23 @@
             };
             studySessions.push(newSession);
 
-            // Grant XP for the session duration (1 XP per minute)
-            const xpGained = Math.floor(durationMs / (1000 * 60));
+            // Grant XP for the session duration (0.5 XP per minute)
+            const xpGained = Math.floor(durationMs / (1000 * 60)) * XP_PER_MINUTE_BASE;
             currentXP += xpGained;
             updateLevel(); // Check for level up
+            if (xpGained > 0) {
+                showFloatingText(xpInfo, `+${Math.floor(xpGained)} XP`, getComputedStyle(document.documentElement).getPropertyValue('--xp-fill-color'));
+            }
+
+
+            // Grant cash for the session duration with random multiplier
+            const cashMultiplier = Math.random() * (CASH_MULTIPLIER_MAX - CASH_MULTIPLIER_MIN) + CASH_MULTIPLIER_MIN;
+            const cashGained = Math.floor(Math.floor(durationMs / (1000 * 60)) * CASH_PER_MINUTE_BASE * cashMultiplier);
+            currentCash += cashGained;
+            renderCash();
+            if (cashGained > 0) {
+                showFloatingText(cashDisplay, `+$${cashGained}`, getComputedStyle(document.documentElement).getPropertyValue('--accent-green'));
+            }
 
             totalStudyOverallMs += durationMs;
             totalStudyTodayMs += durationMs;
@@ -1829,6 +2562,9 @@
             pomodoroShortBreakTime = shortBreakMins * 60 * 1000;
             pomodoroLongBreakTime = longBreakMins * 60 * 1000;
 
+            // Update ambient sound settings as well
+            updateAmbientSound(); // This will save the selection and volume
+
             // Reset Pomodoro timer with new settings
             resetPomodoroTimer();
             saveToLocalStorage();
@@ -1836,23 +2572,24 @@
         }
 
         /**
-         * Toggles the play/pause state of the ambient background sound.
-         * @param {boolean} enable - True to play, false to pause.
+         * Updates the ambient background sound based on selection and volume.
          */
-        function toggleAmbientSound(enable) {
-            if (enable) {
-                // Check if audio is supported and user interaction occurred
-                const playPromise = ambientSound.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.error("Ambient sound autoplay prevented:", error);
-                        // Show a message to the user that autoplay failed and they might need to interact
-                        // This might be due to browser autoplay policies, so we don't block the app.
-                    });
+        function updateAmbientSound() {
+            const selectedSound = ambientSoundSelector.value;
+            const newSrc = ambientSoundsMap[selectedSound];
+
+            // Stop current sound if playing
+            ambientAudio.pause();
+            ambientAudio.currentTime = 0; // Reset playback position
+
+            if (newSrc) {
+                ambientAudio.src = newSrc;
+                ambientAudio.load(); // Load the new source
+                if (pomodoroIsRunning) { // Only play if a sound is selected AND pomodoro is running
+                    ambientAudio.play().catch(e => console.error("Ambient sound autoplay prevented:", e));
                 }
-            } else {
-                ambientSound.pause();
             }
+            saveToLocalStorage(); // Save selected sound and volume
         }
 
 
@@ -1963,7 +2700,7 @@
 
             individualNotes.forEach(note => {
                 const noteDiv = document.createElement('div');
-                noteDiv.className = `bg-gray-700 p-3 rounded-md shadow-md mb-2`;
+                noteDiv.className = `note-item`; // Use 'note-item' class
                 noteDiv.innerHTML = `
                     <div class="flex justify-between items-center mb-1">
                         <span class="font-semibold text-gray-100 text-lg">${note.title || 'Untitled Note'}</span>
@@ -2051,7 +2788,7 @@
         }
 
 
-        // --- Goals Functions ---
+        // --- Goals Functions (Now in Notepad) ---
         function renderGoals() {
             goalsContainer.innerHTML = '';
             if (studyGoals.length === 0) {
@@ -2142,7 +2879,7 @@
             }
         }
 
-        // --- Resources Functions ---
+        // --- Resources Functions (Now in Notepad) ---
         function renderResources() {
             resourcesContainer.innerHTML = '';
             if (studyResources.length === 0) {
@@ -2223,16 +2960,14 @@
          * @returns {number} The amount of XP required to reach this level from the previous one.
          */
         function calculateXPForNextLevel(level) {
-            // A balanced quadratic progression: baseXP + (level * level * growthFactor)
-            const baseXP = 100;
-            const growthFactor = 5; // Smaller growth factor for smoother progression
-            return Math.floor(baseXP + ((level - 1) * (level - 1) * growthFactor));
+            // Much higher XP requirement: baseXP + (level * level * growthFactor)
+            return Math.floor(1000 + (level - 1) * 100 + Math.pow(level - 1, 2) * 20); // Adjusted for higher requirements
         }
 
         /**
          * Gets the title for the current level.
          * @param {number} level - The current level.
-         * @returns {string} The title for the level, or "Advanced Learner" as a fallback.
+         * @returns {string} The title for the level, or "New Learner" as a fallback.
          */
         function getLevelTitle(level) {
             // Find the highest level key that is less than or equal to the current level
@@ -2251,30 +2986,312 @@
         function updateLevel() {
             let leveledUp = false;
             while (currentXP >= xpToNextLevel) {
-                currentXP -= xpToNextLevel; // Carry over excess XP
                 currentLevel++;
                 xpToNextLevel = calculateXPForNextLevel(currentLevel);
                 leveledUp = true;
                 const levelTitle = getLevelTitle(currentLevel);
                 showCustomModal('Level Up!', `Congratulations! You've reached Level ${currentLevel}: <strong>${levelTitle}</strong>!`, false);
             }
+            // Logic to de-level if XP drops (e.g., session deletion)
+            while (currentLevel > 1 && currentXP < (calculateXPForNextLevel(currentLevel - 1) || 0)) {
+                currentLevel--;
+                xpToNextLevel = calculateXPForNextLevel(currentLevel); // Recalculate based on new level
+            }
             updateXPBar(); // Always update the bar after XP/level changes
             saveToLocalStorage(); // Persist changes
+            renderShop(); // Re-render shop to update unlock statuses
+            renderInvestments(); // Re-render investments as options might change
         }
 
         /**
          * Updates the visual XP bar and text.
          */
         function updateXPBar() {
-            const progress = (currentXP / xpToNextLevel) * 100;
-            xpBarFill.style.width = `${Math.min(100, progress)}%`; // Cap at 100%
-            const currentTitle = getLevelTitle(currentLevel);
-            xpInfo.textContent = `Level ${currentLevel} (${currentTitle}) | XP: ${currentXP} / ${xpToNextLevel}`;
+            const xpNeededForCurrentLevel = calculateXPForNextLevel(currentLevel);
+            const xpFromPreviousLevel = (currentLevel > 1) ? calculateXPForNextLevel(currentLevel - 1) : 0;
+            const xpProgressInCurrentLevel = currentXP - xpFromPreviousLevel;
+            const xpNeededForNextLevelSegment = xpNeededForCurrentLevel - xpFromPreviousLevel;
 
-            // Show/hide XP bar container based on current tab
+            let progressPercentage;
+            if (xpNeededForNextLevelSegment <= 0) {
+                progressPercentage = 100;
+            } else {
+                progressPercentage = (xpProgressInCurrentLevel / xpNeededForNextLevelSegment) * 100;
+            }
+            progressPercentage = Math.min(100, Math.max(0, progressPercentage));
+
+            xpBarFill.style.width = `${progressPercentage}%`;
+            const currentTitle = getLevelTitle(currentLevel);
+            xpInfo.textContent = `${Math.floor(xpProgressInCurrentLevel)} / ${xpNeededForNextLevelSegment} XP`;
+            levelDisplay.textContent = `Level ${currentLevel} (${currentTitle})`;
+
             const isStudyTrackerActive = navStudyTracker.classList.contains('active');
-            xpBarContainer.classList.toggle('hidden', !isStudyTrackerActive);
+            xpCashWrapper.classList.toggle('hidden', !isStudyTrackerActive);
         }
+
+        /**
+         * Renders the current cash amount.
+         */
+        function renderCash() {
+            cashDisplay.textContent = `$${currentCash.toLocaleString()}`;
+            const isStudyTrackerActive = navStudyTracker.classList.contains('active');
+            xpCashWrapper.classList.toggle('hidden', !isStudyTrackerActive);
+        }
+
+
+        // --- AI Assistant Functions ---
+        function renderChatHistory() {
+            chatWindow.innerHTML = '';
+            chatHistory.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${message.role}-message`;
+                messageDiv.innerHTML = `<p>${formatTextWithMarkdown(message.parts[0].text)}</p>`;
+                chatWindow.appendChild(messageDiv);
+            });
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        async function sendChatMessage() {
+            const prompt = userInput.value.trim();
+            if (!prompt) return;
+
+            // Ensure API key is present
+            if (!geminiApiKey) {
+                showCustomModal('API Key Required', 'Please enter your Gemini API Key to use the AI Assistant.');
+                return;
+            }
+
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            renderChatHistory();
+            userInput.value = '';
+            loadingIndicator.classList.remove('hidden');
+
+            try {
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const aiResponseText = result.candidates[0].content.parts[0].text;
+                    chatHistory.push({ role: "model", parts: [{ text: aiResponseText }] });
+                } else {
+                    console.error("Unexpected API response structure:", result);
+                    chatHistory.push({ role: "model", parts: [{ text: "I'm sorry, I couldn't get a response. There might be an issue with the API or your key. Please try again later." }] });
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                chatHistory.push({ role: "model", parts: [{ text: "I'm having trouble connecting right now. Please check your internet connection or confirm your API key is correct and valid." }] });
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                renderChatHistory();
+                saveToLocalStorage();
+            }
+        }
+
+        function saveGeminiApiKey() {
+            const key = geminiApiKeyInput.value.trim();
+            if (key) {
+                geminiApiKey = key;
+                localStorage.setItem('geminiApiKey', geminiApiKey);
+                showCustomModal('API Key Saved', 'Your Gemini API key has been saved locally. The AI Assistant should now work.');
+            } else {
+                showCustomModal('Empty API Key', 'Please enter your Gemini API key before saving.');
+            }
+        }
+
+        function clearGeminiApiKey() {
+            geminiApiKey = "";
+            localStorage.removeItem('geminiApiKey');
+            geminiApiKeyInput.value = "";
+            showCustomModal('API Key Cleared', 'Your Gemini API key has been cleared from local storage. The AI Assistant will not function until a new key is provided.');
+        }
+
+
+        // --- Daily Focus Functions (Now hardcoded quotes) ---
+        function displayDailyTip() {
+            dailyFocusText.innerHTML = formatTextWithMarkdown(dailyTips[currentTipIndex]);
+            currentTipIndex = (currentTipIndex + 1) % dailyTips.length; // Cycle through tips
+            localStorage.setItem('currentTipIndex', currentTipIndex); // Save current index
+        }
+
+
+        // --- Shop Functions (NEW) ---
+
+        /**
+         * Calculates the total XP required to reach a specific level.
+         * @param {number} targetLevel - The level to reach.
+         * @returns {number} Total XP required.
+         */
+        function getTotalXPForLevel(targetLevel) {
+            let totalXp = 0;
+            // The XP required for a level is the XP *to reach* that level.
+            // So, for level 1, it's 100. For level 2, it's 100 + calculateXPForNextLevel(2), etc.
+            // Adjusting this to be the total accumulated XP *to have achieved* that level.
+            for (let i = 1; i <= targetLevel; i++) {
+                totalXp += calculateXPForNextLevel(i);
+            }
+            return totalXp;
+        }
+
+
+        /**
+         * Renders the shop items (skins).
+         */
+        function renderShop() {
+            shopSkinsContainer.innerHTML = ''; // Clear existing skins
+
+            skins.forEach(skin => {
+                // Determine if the skin is unlocked
+                if (skin.levelRequired === 0 && skin.cost === 0) {
+                    skin.unlocked = true; // Default skins are always unlocked
+                } else if (currentLevel >= skin.levelRequired && !skin.unlocked) {
+                    // Automatically unlock if criteria met and not already marked unlocked
+                    skin.unlocked = true;
+                    saveToLocalStorage(); // Save the new unlocked status
+                }
+
+                const isLocked = currentLevel < skin.levelRequired;
+                const canAfford = currentCash >= skin.cost;
+                const isCurrentSkin = activeSkinId === skin.id;
+
+                let buttonText = 'Select';
+                let buttonDisabled = false;
+                let buttonClasses = 'bg-blue-500 hover:bg-blue-600';
+
+                if (isLocked) {
+                    buttonText = `Unlock (Level ${skin.levelRequired})`;
+                    buttonDisabled = true;
+                    buttonClasses = 'bg-gray-500 cursor-not-allowed';
+                } else if (!skin.unlocked && !canAfford) { // Not unlocked, can't afford
+                    buttonText = `Purchase ($${skin.cost.toLocaleString()})`;
+                    buttonDisabled = true;
+                    buttonClasses = 'bg-red-500 cursor-not-allowed';
+                } else if (!skin.unlocked && canAfford) { // Not unlocked, but CAN afford
+                    buttonText = `Purchase ($${skin.cost.toLocaleString()})`;
+                    buttonClasses = 'bg-green-500 hover:bg-green-600';
+                } else if (isCurrentSkin) { // Already unlocked and is current skin
+                    buttonText = 'Current Skin';
+                    buttonDisabled = true;
+                    buttonClasses = 'bg-gray-700 cursor-not-allowed';
+                } else if (skin.unlocked && !isCurrentSkin) { // Unlocked but not current
+                    buttonText = 'Select';
+                    buttonClasses = 'bg-blue-500 hover:bg-blue-600';
+                }
+
+
+                // Calculate study hours to unlock if locked
+                let studyHoursInfo = '';
+                if (isLocked) {
+                    const currentTotalXP = getTotalXPForLevel(currentLevel); // Total XP accumulated up to current level
+                    const requiredTotalXP = getTotalXPForLevel(skin.levelRequired); // Total XP needed to reach skin's required level
+                    const remainingXp = Math.max(0, requiredTotalXP - currentXP); // XP needed from current state
+                    const hoursRemaining = Math.ceil(remainingXp / (XP_PER_MINUTE_BASE * 60)); // Convert XP to hours based on base XP_PER_MINUTE
+                    studyHoursInfo = `<p class="text-xs text-gray-400 mt-1">~${hoursRemaining} hrs to unlock</p>`;
+                }
+
+
+                const skinCard = document.createElement('div');
+                skinCard.className = `shop-skin-card rounded-xl shadow-lg p-4 text-center ${isLocked ? 'locked' : ''} ${isCurrentSkin ? 'current-skin' : ''}`;
+                skinCard.innerHTML = `
+                    <div class="shop-skin-preview ${skin.bodyClass}"></div>
+                    <h3 class="text-lg font-semibold mt-2">${skin.name}</h3>
+                    <p class="text-sm text-gray-300">Level Required: ${skin.levelRequired}</p>
+                    <p class="text-sm text-gray-300">Cost: ${skin.cost.toLocaleString()} <span class="text-green-400">$</span></p>
+                    ${studyHoursInfo}
+                    <button data-id="${skin.id}"
+                            class="mt-3 w-full py-2 px-4 rounded-md font-bold transition duration-300 ease-in-out ${buttonClasses}"
+                            ${buttonDisabled ? 'disabled' : ''}>
+                        ${buttonText}
+                    </button>
+                `;
+                shopSkinsContainer.appendChild(skinCard);
+
+                // Add event listener to the button
+                skinCard.querySelector('button').addEventListener('click', (event) => {
+                    const skinId = event.target.dataset.id;
+                    const targetSkin = skins.find(s => s.id === skinId);
+                    if (!targetSkin) return;
+
+                    if (isLocked) {
+                        showCustomModal('Locked Skin', `You need to reach Level ${targetSkin.levelRequired} to unlock this skin. Keep studying!`);
+                    } else if (!targetSkin.unlocked && !canAfford) {
+                        showCustomModal('Not Enough Money', `You need $${targetSkin.cost.toLocaleString()} to purchase this skin. You currently have $${currentCash.toLocaleString()}.`);
+                    } else if (!targetSkin.unlocked && canAfford) {
+                        purchaseSkin(skinId);
+                    } else { // Already unlocked or default, just apply
+                        applySkin(skinId);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Purchases a skin.
+         * @param {string} skinId - The ID of the skin to purchase.
+         */
+        async function purchaseSkin(skinId) {
+            const skin = skins.find(s => s.id === skinId);
+            if (!skin || skin.unlocked || currentCash < skin.cost || currentLevel < skin.levelRequired) {
+                showCustomModal('Error', 'Cannot purchase skin. Check requirements and funds.');
+                return;
+            }
+
+            const confirmed = await showCustomModal(
+                'Confirm Purchase',
+                `Are you sure you want to purchase "${skin.name}" for $${skin.cost.toLocaleString()}?`,
+                true
+            );
+
+            if (confirmed) {
+                currentCash -= skin.cost;
+                skin.unlocked = true;
+                activeSkinId = skinId; // Automatically select after purchase
+                saveToLocalStorage();
+                renderCash();
+                renderShop(); // Re-render shop to update buttons
+                applySkin(skinId, false); // Apply the new skin without re-saving
+                showCustomModal('Purchase Successful!', `You've unlocked and applied the "${skin.name}" skin!`);
+            }
+        }
+
+        /**
+         * Applies a selected skin to the body.
+         * @param {string} skinId - The ID of the skin to apply.
+         * @param {boolean} shouldSave - Whether to save the active skin to local storage. Default true.
+         */
+        function applySkin(skinId, shouldSave = true) {
+            const body = document.body;
+            // Remove all existing skin classes
+            skins.forEach(skin => {
+                body.classList.remove(skin.bodyClass);
+            });
+
+            const selectedSkin = skins.find(s => s.id === skinId);
+            if (selectedSkin && selectedSkin.unlocked) {
+                body.classList.add(selectedSkin.bodyClass);
+                activeSkinId = skinId;
+                if (shouldSave) {
+                    saveToLocalStorage();
+                }
+            } else if (skinId === 'default-dark') { // Fallback if somehow active skin is locked
+                 body.classList.add('default-dark-skin');
+                 activeSkinId = 'default-dark';
+                 if (shouldSave) {
+                    saveToLocalStorage();
+                }
+            }
+            renderShop(); // Update shop buttons to reflect current skin
+        }
+
 
         // --- Main Mode Switching Functions (Stopwatch/Pomodoro/Stats) ---
 
@@ -2286,7 +3303,8 @@
         function showMainModeView(mode) {
             stopwatchView.classList.add('hidden');
             pomodoroView.classList.add('hidden');
-            statsView.classList.add('hidden');
+            // Removed statsView.classList.add('hidden'); as the main stats are now always present in Study Tracker
+            statsView.classList.add('hidden'); // This is the old "Advanced Stats" tab, which is now just a placeholder.
 
             modeStopwatchBtn.classList.remove('active-mode');
             modePomodoroBtn.classList.remove('active-mode');
@@ -2301,7 +3319,7 @@
                 // Ensure pomodoro display is updated when shown
                 updatePomodoroDisplay();
             } else if (mode === 'stats') {
-                statsView.classList.remove('hidden');
+                statsView.classList.remove('hidden'); // Show the dedicated stats area within study tracker
                 modeStatsSubBtn.classList.add('active-mode');
                 // Ensure stats are re-rendered if needed (recalculateStats already calls renderStats)
                 renderStats();
@@ -2328,6 +3346,10 @@
             });
 
 
+            // Hide daily focus container by default, only show for specific tabs
+            dailyFocusContainer.classList.add('hidden');
+
+
             // Show the selected section
             const targetSection = document.getElementById(tabId);
             if (targetSection) {
@@ -2341,22 +3363,231 @@
             // Update active state for main navigation buttons
             document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
             // This handles mapping section IDs to nav button IDs correctly
-            document.getElementById(`nav-${tabId.replace('-section', '').replace('main-tracker', 'study-tracker').replace('stats', 'stats-main').replace('coming-soon', 'coming-soon').replace('sponsor', 'sponsor')}`).classList.add('active');
+            document.getElementById(`nav-${tabId.replace('-section', '').replace('main-tracker', 'study-tracker')}`).classList.add('active');
 
 
             // Special handling for the main tracker to manage stopwatch/pomodoro/stats sub-views
             if (tabId === 'main-tracker-section') {
                 // When coming back to main-tracker-section, show the last active mode
                 showMainModeView(currentDisplayMode);
-                xpBarContainer.classList.remove('hidden'); // Show XP bar on study tracker tab
+                xpCashWrapper.classList.remove('hidden'); // Show XP/Cash wrapper on study tracker tab
+                dailyFocusContainer.classList.remove('hidden'); // Show daily focus on study tracker
             } else {
                 // Ensure timers are stopped if not on the main tracker page
                 if (isRunning) stopTimer();
                 if (pomodoroIsRunning) pausePomodoroTimer();
-                xpBarContainer.classList.add('hidden'); // Hide XP bar on other tabs
+                xpCashWrapper.classList.add('hidden'); // Hide XP/Cash wrapper on other tabs
+            }
+            // Ensure shop is rendered when shop tab is selected
+            if (tabId === 'shop-section') {
+                renderShop();
+            }
+            // Ensure daily focus is visible on Notepad tab
+            if (tabId === 'notepad-section') {
+                dailyFocusContainer.classList.remove('hidden');
+            }
+            // Ensure investments are rendered when capitalist tab is selected
+            if (tabId === 'capitalist-section') {
+                renderInvestments();
             }
         }
 
+
+        // --- StudyFlow Capitalist Game Logic (NEW) ---
+
+        /**
+         * Defines investment options with their base ROI, duration, and level requirements.
+         */
+        const investmentOptions = [
+            // Bonds (more stable, guaranteed min ROI)
+            { id: 'bond-1hr', name: 'Basic Study Bond', type: 'bond', durationMs: 3600000, baseMinROI: 0.05, baseMaxROI: 0.10, levelRequired: 1, xpReward: 5, riskFactor: 0 }, // 1 hour, 5-10%
+            { id: 'bond-6hr', name: 'Intermediate Study Bond', type: 'bond', durationMs: 21600000, baseMinROI: 0.10, baseMaxROI: 0.20, levelRequired: 5, xpReward: 15, riskFactor: 0 }, // 6 hours, 10-20%
+            { id: 'bond-24hr', name: 'Advanced Study Bond', type: 'bond', durationMs: 86400000, baseMinROI: 0.20, baseMaxROI: 0.40, levelRequired: 10, xpReward: 30, riskFactor: 0 }, // 24 hours, 20-40%
+
+            // Ventures (higher risk/reward, can lose money)
+            { id: 'venture-short', name: 'Startup Study Venture', type: 'venture', durationMs: 1800000, baseMinROI: -0.10, baseMaxROI: 0.20, levelRequired: 3, xpReward: 10, riskFactor: 0.5 }, // 30 mins, -10% to 20%
+            { id: 'venture-medium', name: 'Research Project', type: 'venture', durationMs: 10800000, baseMinROI: -0.20, baseMaxROI: 0.50, levelRequired: 8, xpReward: 25, riskFactor: 0.7 }, // 3 hours, -20% to 50%
+            { id: 'venture-long', name: 'Edu-Tech Innovation', type: 'venture', durationMs: 43200000, baseMinROI: -0.30, baseMaxROI: 1.00, levelRequired: 13, xpReward: 50, riskFactor: 1.0 } // 12 hours, -30% to 100%
+        ];
+
+        /**
+         * Initiates an investment.
+         */
+        async function makeInvestment() {
+            const amount = parseInt(investmentAmountInput.value, 10);
+            const type = investmentTypeSelect.value;
+            const durationMs = parseInt(investmentDurationSelect.value, 10);
+
+            // Find the chosen option to get its base ROI and level requirements
+            const selectedOption = investmentOptions.find(opt => opt.type === type && opt.durationMs === durationMs && currentLevel >= opt.levelRequired);
+
+            if (!selectedOption) {
+                await showCustomModal('Investment Not Available', 'This investment option is not available at your current level or combination selected. Please check requirements.');
+                return;
+            }
+
+            if (isNaN(amount) || amount <= 0) {
+                await showCustomModal('Invalid Amount', 'Please enter a positive amount to invest.');
+                return;
+            }
+            if (amount > currentCash) {
+                await showCustomModal('Insufficient Funds', `You need $${amount.toLocaleString()} for this investment, but you only have $${currentCash.toLocaleString()}.`);
+                return;
+            }
+
+            currentCash -= amount; // Deduct money immediately
+            renderCash();
+
+            // Calculate actual ROI range based on level
+            let minROI = selectedOption.baseMinROI;
+            let maxROI = selectedOption.baseMaxROI;
+
+            // Increase lucrativeness and risk with level (example scaling)
+            const levelBonusFactor = Math.min(1.5, 1 + (currentLevel / 20)); // Scales up to 1.5x at level 20
+            if (selectedOption.type === 'bond') {
+                minROI *= levelBonusFactor;
+                maxROI *= levelBonusFactor;
+            } else { // Venture, also increase risk (wider range, more negative potential)
+                minROI *= levelBonusFactor * (1 - selectedOption.riskFactor);
+                maxROI *= levelBonusFactor * (1 + selectedOption.riskFactor);
+            }
+
+            const newInvestment = {
+                id: generateUniqueId(),
+                amount: amount,
+                type: type,
+                durationMs: durationMs,
+                startTime: Date.now(),
+                endTime: Date.now() + durationMs,
+                minROI: minROI,
+                maxROI: maxROI,
+                xpReward: selectedOption.xpReward,
+                matured: false,
+                result: null // 'profit', 'loss', 'even'
+            };
+            investments.push(newInvestment);
+            saveToLocalStorage();
+            renderInvestments();
+            await showCustomModal('Investment Placed!', `You invested $${amount.toLocaleString()} in a ${selectedOption.name}. Check back later to see your returns!`);
+        }
+
+        /**
+         * Calculates returns and collects earnings for a matured investment.
+         * @param {string} id - The ID of the investment to collect.
+         */
+        async function collectInvestment(id) {
+            const index = investments.findIndex(inv => inv.id === id);
+            if (index === -1) return;
+
+            const investment = investments[index];
+            if (!investment.matured) {
+                await showCustomModal('Investment Not Matured', 'This investment has not matured yet.');
+                return;
+            }
+
+            // Calculate actual ROI within the range (simulating random market fluctuation)
+            const actualROI = investment.minROI + (Math.random() * (investment.maxROI - investment.minROI));
+            const returnAmount = Math.floor(investment.amount * actualROI);
+            const totalReturn = investment.amount + returnAmount;
+
+            currentCash += totalReturn; // Add returns to cash
+            renderCash();
+
+            let message = '';
+            if (returnAmount > 0) {
+                message = `Your ${investment.type === 'bond' ? 'bond' : 'venture'} matured! You earned $${returnAmount.toLocaleString()} profit, for a total of $${totalReturn.toLocaleString()}.`;
+                showFloatingText(cashDisplay, `+$${returnAmount}`, getComputedStyle(document.documentElement).getPropertyValue('--accent-green'));
+                // Award XP for successful investments
+                currentXP += investment.xpReward;
+                updateLevel();
+                showFloatingText(xpInfo, `+${investment.xpReward} XP`, getComputedStyle(document.documentElement).getPropertyValue('--xp-fill-color'));
+                investment.result = 'profit';
+            } else if (returnAmount < 0) {
+                message = `Your ${investment.type === 'bond' ? 'bond' : 'venture'} matured with a loss! You lost $${Math.abs(returnAmount).toLocaleString()}, resulting in $${totalReturn.toLocaleString()}.`;
+                showFloatingText(cashDisplay, `-$${Math.abs(returnAmount)}`, getComputedStyle(document.documentElement).getPropertyValue('--accent-red'));
+                investment.result = 'loss';
+            } else {
+                message = `Your ${investment.type === 'bond' ? 'bond' : 'venture'} broke even. You got your $${investment.amount.toLocaleString()} back.`;
+                investment.result = 'even';
+            }
+
+            investments.splice(index, 1); // Remove from active investments
+            saveToLocalStorage();
+            renderInvestments(); // Re-render to update list
+
+            await showCustomModal('Investment Result', message);
+        }
+
+        /**
+         * Renders the list of active and matured investments.
+         */
+        function renderInvestments() {
+            investmentListContainer.innerHTML = '';
+            if (investments.length === 0) {
+                investmentListContainer.innerHTML = '<p class="text-gray-400 text-center text-sm">No active investments.</p>';
+                return;
+            }
+
+            const now = Date.now();
+            investments.forEach(investment => {
+                let timeLeftMs = investment.endTime - now;
+                let progressPercentage = Math.min(100, Math.max(0, ((now - investment.startTime) / investment.durationMs) * 100));
+
+                let statusText = '';
+                let buttonHtml = '';
+                let cardClass = '';
+
+                if (timeLeftMs <= 0) {
+                    investment.matured = true;
+                    statusText = 'Matured!';
+                    cardClass = 'matured';
+                    // Re-calculate result on render if not already calculated (e.g., first load)
+                    if (investment.result === null) {
+                         const actualROI = investment.minROI + (Math.random() * (investment.maxROI - investment.minROI));
+                         const returnAmount = Math.floor(investment.amount * actualROI);
+                         if (returnAmount > 0) { investment.result = 'profit'; }
+                         else if (returnAmount < 0) { investment.result = 'loss'; }
+                         else { investment.result = 'even'; }
+                    }
+                    buttonHtml = `<button class="collect-investment-btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out w-full" data-id="${investment.id}">Collect</button>`;
+                    if (investment.result === 'loss') {
+                        cardClass = 'lost';
+                    } else if (investment.result === 'profit') {
+                        cardClass = 'matured';
+                    }
+                } else {
+                    statusText = `Time Left: ${formatTime(timeLeftMs)}`;
+                    cardClass = '';
+                    buttonHtml = `<button class="collect-investment-btn bg-gray-500 text-white font-bold py-2 px-4 rounded-full w-full cursor-not-allowed" disabled>Collect</button>`;
+                }
+
+                const investmentDiv = document.createElement('div');
+                investmentDiv.className = `investment-card p-4 rounded-xl shadow-md ${cardClass}`;
+                investmentDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-gray-100">${investment.type === 'bond' ? 'Study Bond' : 'Study Venture'}</span>
+                        <span class="text-gray-200">$${investment.amount.toLocaleString()}</span>
+                    </div>
+                    <div class="text-xs text-gray-300 mb-2">
+                        <span>Expected ROI: ${Math.floor(investment.minROI * 100)}% to ${Math.floor(investment.maxROI * 100)}%</span>
+                        ${investment.type === 'venture' ? '<span class="text-red-400 ml-2">(Volatile!)</span>' : ''}
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mb-2 progress-bar">
+                        <div class="h-2.5 rounded-full progress-fill" style="width: ${progressPercentage}%"></div>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-3">${statusText}</p>
+                    ${buttonHtml}
+                `;
+                investmentListContainer.appendChild(investmentDiv);
+            });
+
+            document.querySelectorAll('.collect-investment-btn').forEach(button => {
+                if (!button.disabled) {
+                    button.addEventListener('click', (event) => collectInvestment(event.target.dataset.id));
+                }
+            });
+            saveToLocalStorage(); // To persist matured status etc.
+        }
 
         // --- Event Listeners ---
         startBtn.addEventListener('click', startTimer);
@@ -2377,9 +3608,10 @@
         togglePomodoroSettingsBtn.addEventListener('click', () => {
             pomodoroSettings.classList.toggle('hidden');
         });
-        ambientSoundToggle.addEventListener('change', (event) => {
-            toggleAmbientSound(event.target.checked);
-            saveToLocalStorage(); // Save ambient sound state
+        ambientSoundSelector.addEventListener('change', updateAmbientSound); // Updated listener for ambient sound
+        ambientVolumeSlider.addEventListener('input', (event) => {
+            ambientAudio.volume = parseFloat(event.target.value);
+            saveToLocalStorage(); // Save volume setting
         });
 
 
@@ -2405,11 +3637,10 @@
         // Top-level Tab navigation listeners
         navStudyTracker.addEventListener('click', () => showTab('main-tracker-section'));
         navNotepad.addEventListener('click', () => showTab('notepad-section'));
-        navGoals.addEventListener('click', () => showTab('goals-section'));
-        navResources.addEventListener('click', () => showTab('resources-section'));
-        navAbout.addEventListener('click', () => showTab('about-section')); // New about tab
-        navComingSoon.addEventListener('click', () => showTab('coming-soon-section')); // New coming soon tab
-        navSponsor.addEventListener('click', () => showTab('sponsor-section')); // New sponsor tab
+        navShop.addEventListener('click', () => showTab('shop-section')); // NEW
+        navCapitalist.addEventListener('click', () => showTab('capitalist-section')); // NEW
+        navAbout.addEventListener('click', () => showTab('about-section'));
+        navAIAssistant.addEventListener('click', () => showTab('ai-assistant-section'));
 
 
         // Checklist event listeners
@@ -2437,7 +3668,7 @@
         });
 
 
-        // Goals event listeners
+        // Goals event listeners (Now in Notepad)
         addGoalBtn.addEventListener('click', addGoal);
         newGoalNameInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && newGoalNameInput.value.trim() !== '') {
@@ -2456,7 +3687,7 @@
         });
 
 
-        // Resources event listeners
+        // Resources event listeners (Now in Notepad)
         addResourceBtn.addEventListener('click', addResource);
         newResourceTitleInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && newResourceUrlInput.value.trim() !== '') {
@@ -2468,6 +3699,22 @@
                 addResource();
             }
         });
+
+        // AI Assistant Event Listeners
+        sendChatBtn.addEventListener('click', sendChatMessage);
+        userInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+        saveApiKeyBtn.addEventListener('click', saveGeminiApiKey);
+        clearApiKeyBtn.addEventListener('click', clearGeminiApiKey);
+
+        // Daily Focus Event Listener (Now cycles through hardcoded tips)
+        getDailyFocusBtn.addEventListener('click', displayDailyTip);
+
+        // Capitalist Game Event Listeners (NEW)
+        investBtn.addEventListener('click', makeInvestment);
 
 
         // --- Keyboard Shortcuts ---
@@ -2522,27 +3769,36 @@
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            populateHourDropdowns(); // Populate hour dropdowns first
+            populateHourDropdowns();
             loadFromLocalStorage();
             renderStats();
             renderLog();
             renderChecklist();
-            renderGoals();
-            renderResources();
-            setStopwatchButtonStates(); // Set initial state for stopwatch buttons
-            updatePomodoroDisplay(); // Initial display for Pomodoro timer
+            renderIndividualNotes();
+            renderResources(); // Render resources in Notepad
+            renderGoals(); // Render goals in Notepad
+            setStopwatchButtonStates();
+            updatePomodoroDisplay();
 
             // Set initial tab to Study Tracker and show its default mode (stopwatch)
             showTab('main-tracker-section');
-            showMainModeView('stopwatch'); // Explicitly show stopwatch as default sub-tab
-            navStudyTracker.classList.add('active'); // Ensure main nav button is active
-            updateXPBar(); // Initialize XP bar visibility and state
+            showMainModeView('stopwatch');
+            navStudyTracker.classList.add('active');
+            updateXPBar();
+            renderCash();
+
+            // Display the initial daily tip
+            currentTipIndex = parseInt(localStorage.getItem('currentTipIndex') || '0', 10);
+            displayDailyTip();
+
 
             // Check if goal has been set, otherwise prompt
             const hasSetGoal = localStorage.getItem('hasSetGoal');
             if (!hasSetGoal) {
                 openGoalModal();
             }
+            // Periodically update investments progress
+            setInterval(renderInvestments, 1000); // Update every second to show progress
         });
     </script>
 </body>
